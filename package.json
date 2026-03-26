@@ -1,0 +1,12 @@
+{
+  "name": "earndash",
+  "private": true,
+  "workspaces": [
+    "apps/backend"
+  ],
+  "scripts": {
+    "backend:dev": "npm --workspace apps/backend run start:dev",
+    "backend:build": "npm --workspace apps/backend run build",
+    "backend:start": "npm --workspace apps/backend run start:prod"
+  }
+}

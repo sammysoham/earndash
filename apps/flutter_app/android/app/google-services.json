@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "889132772936",
+    "project_id": "earndash-8b4bb",
+    "storage_bucket": "earndash-8b4bb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:889132772936:android:2e0cbc5a7346d5f66af27d",
+        "android_client_info": {
+          "package_name": "com.velorastudios.earndash"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCPzOvwBUjy70dEFzCJhrtVcrvMgjoEljk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,51 @@
+import 'package:flutter/foundation.dart';
+
+class AppConstants {
+  static const String appNickname = 'EarnDash';
+  static const String apiBaseUrl = String.fromEnvironment(
+    'API_BASE_URL',
+    defaultValue: 'http://192.168.1.101:3000/api',
+  );
+  static const int coinsPerDollar = 1000;
+  static const String authTokenKey = 'earndash_auth_token';
+  static const bool useMockApi = bool.fromEnvironment(
+    'USE_MOCK_API',
+    defaultValue: false,
+  );
+  static const String adMobAppId = 'ca-app-pub-5697965850070399~4476598605';
+  static const String adMobAndroidRewardedUnitId = 'ca-app-pub-5697965850070399/3076854626';
+  static const String adMobAndroidBannerUnitId = 'ca-app-pub-5697965850070399/7799700280';
+  static const String adMobAndroidRewardedInterstitialUnitId = 'ca-app-pub-5697965850070399/7206605661';
+  static const String adMobAndroidNativeAdvancedUnitId = 'ca-app-pub-5697965850070399/6197841980';
+  static const String adMobIosRewardedUnitId = '';
+  static const bool firebaseAuthEnabled = true;
+  static const String firebaseGoogleWebClientId = '';
+
+  static String get rewardedAdUnitId {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.iOS:
+        return adMobIosRewardedUnitId;
+      case TargetPlatform.android:
+      default:
+        return adMobAndroidRewardedUnitId;
+    }
+  }
+
+  static String get bannerAdUnitId {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return adMobAndroidBannerUnitId;
+      default:
+        return '';
+    }
+  }
+
+  static String get rewardedInterstitialAdUnitId {
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+        return adMobAndroidRewardedInterstitialUnitId;
+      default:
+        return '';
+    }
+  }
+}
