@@ -6,10 +6,15 @@ import { Profile, Strategy } from 'passport-google-oauth20';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(configService: ConfigService) {
+    const clientID = configService.get<string>('googleClientId') ?? '';
+    const clientSecret = configService.get<string>('googleClientSecret') ?? '';
+    const callbackURL = configService.get<string>('googleCallbackUrl') ?? '';
+    const configured = !!(clientID && clientSecret && callbackURL);
+
     super({
-      clientID: configService.get<string>('googleClientId') ?? '',
-      clientSecret: configService.get<string>('googleClientSecret') ?? '',
-      callbackURL: configService.get<string>('googleCallbackUrl') ?? '',
+      clientID: configured ? clientID : 'google-oauth-disabled',
+      clientSecret: configured ? clientSecret : 'google-oauth-disabled',
+      callbackURL: configured ? callbackURL : 'http://localhost/google-oauth-disabled',
       scope: ['email', 'profile'],
     });
   }
