@@ -40,7 +40,7 @@ export class Withdrawal extends AppBaseEntity {
   @Column()
   destination!: string;
 
-  @Column({ name: 'approved_by', nullable: true })
+  @Column({ name: 'approved_by', type: 'varchar', nullable: true })
   approvedBy!: string | null;
 
   @Column({ name: 'processed_at', type: 'timestamptz', nullable: true })

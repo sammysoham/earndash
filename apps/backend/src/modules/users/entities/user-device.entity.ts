@@ -18,14 +18,14 @@ export class UserDevice extends AppBaseEntity {
   @Column({ name: 'device_type' })
   deviceType!: string;
 
-  @Column({ name: 'advertising_id', nullable: true })
+  @Column({ name: 'advertising_id', type: 'varchar', nullable: true })
   advertisingId!: string | null;
 
   @Column({ name: 'ip_address' })
   @Index()
   ipAddress!: string;
 
-  @Column({ name: 'country_code', nullable: true })
+  @Column({ name: 'country_code', type: 'varchar', nullable: true })
   countryCode!: string | null;
 
   @Column({ name: 'vpn_flag', default: false })

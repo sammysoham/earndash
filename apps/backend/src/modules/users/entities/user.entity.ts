@@ -22,10 +22,10 @@ export class User extends AppBaseEntity {
   @Index()
   email!: string;
 
-  @Column({ name: 'password_hash', nullable: true })
+  @Column({ name: 'password_hash', type: 'varchar', nullable: true })
   passwordHash!: string | null;
 
-  @Column({ name: 'google_id', nullable: true, unique: true })
+  @Column({ name: 'google_id', type: 'varchar', nullable: true, unique: true })
   googleId!: string | null;
 
   @Column({ name: 'display_name' })
@@ -34,14 +34,14 @@ export class User extends AppBaseEntity {
   @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role!: UserRole;
 
-  @Column({ name: 'country_code', nullable: true })
+  @Column({ name: 'country_code', type: 'varchar', nullable: true })
   countryCode!: string | null;
 
-  @Column({ name: 'last_known_ip', nullable: true })
+  @Column({ name: 'last_known_ip', type: 'varchar', nullable: true })
   @Index()
   lastKnownIp!: string | null;
 
-  @Column({ name: 'device_fingerprint', nullable: true })
+  @Column({ name: 'device_fingerprint', type: 'varchar', nullable: true })
   @Index()
   deviceFingerprint!: string | null;
 
@@ -60,7 +60,7 @@ export class User extends AppBaseEntity {
   @Column({ name: 'referral_code', unique: true })
   referralCode!: string;
 
-  @Column({ name: 'referred_by_id', nullable: true })
+  @Column({ name: 'referred_by_id', type: 'varchar', nullable: true })
   referredById!: string | null;
 
   @ManyToOne(() => User, { nullable: true })

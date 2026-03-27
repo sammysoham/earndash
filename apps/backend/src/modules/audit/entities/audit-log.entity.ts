@@ -3,7 +3,7 @@ import { AppBaseEntity } from '../../../common/entities/base.entity';
 
 @Entity('audit_logs')
 export class AuditLog extends AppBaseEntity {
-  @Column({ name: 'actor_id', nullable: true })
+  @Column({ name: 'actor_id', type: 'varchar', nullable: true })
   actorId!: string | null;
 
   @Column()
