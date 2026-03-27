@@ -64,7 +64,7 @@ export class UserActivityStats extends AppBaseEntity {
   @Column({ name: 'suspicious_activity_blocked', default: false })
   suspiciousActivityBlocked!: boolean;
 
-  @Column({ name: 'anti_cheat_message', nullable: true })
+  @Column({ name: 'anti_cheat_message', type: 'varchar', nullable: true })
   antiCheatMessage!: string | null;
 
   @Column({ name: 'tracking_available', default: false })
@@ -79,6 +79,6 @@ export class UserActivityStats extends AppBaseEntity {
   @Column({ name: 'tracking_source', default: 'unknown' })
   trackingSource!: string;
 
-  @Column({ name: 'tracking_message', nullable: true })
+  @Column({ name: 'tracking_message', type: 'varchar', nullable: true })
   trackingMessage!: string | null;
 }

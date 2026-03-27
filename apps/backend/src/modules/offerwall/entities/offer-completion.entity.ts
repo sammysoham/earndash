@@ -47,10 +47,10 @@ export class OfferCompletion extends AppBaseEntity {
   @Column({ name: 'released_at', type: 'timestamptz', nullable: true })
   releasedAt!: Date | null;
 
-  @Column({ name: 'device_type', nullable: true })
+  @Column({ name: 'device_type', type: 'varchar', nullable: true })
   deviceType!: string | null;
 
-  @Column({ name: 'ip_address', nullable: true })
+  @Column({ name: 'ip_address', type: 'varchar', nullable: true })
   ipAddress!: string | null;
 
   @Column({ type: 'jsonb', nullable: true })
