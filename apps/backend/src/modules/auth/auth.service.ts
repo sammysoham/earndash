@@ -51,6 +51,9 @@ export class AuthService {
       throw new BadRequestException('Email already registered');
     }
 
+    const existingAdmins = await this.usersService.listAdmins();
+    const role = existingAdmins.length === 0 ? UserRole.ADMIN : UserRole.USER;
+
     const referrer = dto.referralCode
       ? await this.usersService.findByReferralCode(dto.referralCode)
       : null;
@@ -62,7 +65,7 @@ export class AuthService {
       email: dto.email.toLowerCase(),
       passwordHash: await bcrypt.hash(dto.password, 10),
       displayName: dto.displayName,
-      role: UserRole.USER,
+      role,
       countryCode,
       lastKnownIp: context.ipAddress,
       deviceFingerprint: context.deviceFingerprint ?? null,
@@ -87,7 +90,11 @@ export class AuthService {
     }
 
     await this.gamificationService.onLogin(user.id);
-    await this.auditService.log(user.id, 'AUTH_SIGNUP', 'USER', user.id, { countryCode, antiVpnFlag });
+    await this.auditService.log(user.id, 'AUTH_SIGNUP', 'USER', user.id, {
+      countryCode,
+      antiVpnFlag,
+      role,
+    });
     await this.fraudService.enqueueUserAnalysis(user.id);
 
     return this.buildAuthResponse(await this.usersService.getByIdOrFail(user.id));
@@ -123,7 +130,8 @@ export class AuthService {
     await this.auditService.log(user.id, 'AUTH_LOGIN', 'USER', user.id, { countryCode, antiVpnFlag });
     await this.fraudService.enqueueUserAnalysis(user.id);
 
-    return this.buildAuthResponse(await this.usersService.getByIdOrFail(user.id));
+    const resolvedUser = await this.ensureBootstrapAdmin(user);
+    return this.buildAuthResponse(await this.usersService.getByIdOrFail(resolvedUser.id));
   }
 
   async loginWithGoogleToken(dto: GoogleMobileLoginDto, context: AuthContext) {
@@ -225,7 +233,27 @@ export class AuthService {
     await this.auditService.log(user.id, 'AUTH_GOOGLE_LOGIN', 'USER', user.id, { countryCode, antiVpnFlag });
     await this.fraudService.enqueueUserAnalysis(user.id);
 
-    return this.buildAuthResponse(await this.usersService.getByIdOrFail(user.id));
+    const resolvedUser = await this.ensureBootstrapAdmin(user);
+    return this.buildAuthResponse(await this.usersService.getByIdOrFail(resolvedUser.id));
+  }
+
+  private async ensureBootstrapAdmin(user: User): Promise<User> {
+    if (user.role === UserRole.ADMIN) {
+      return user;
+    }
+
+    const existingAdmins = await this.usersService.listAdmins();
+    if (existingAdmins.length > 0) {
+      return user;
+    }
+
+    user.role = UserRole.ADMIN;
+    const promotedUser = await this.usersService.save(user);
+    await this.auditService.log(promotedUser.id, 'AUTH_BOOTSTRAP_ADMIN', 'USER', promotedUser.id, {
+      promotedFrom: UserRole.USER,
+      promotedTo: UserRole.ADMIN,
+    });
+    return promotedUser;
   }
 
   private buildAuthResponse(user: User) {
