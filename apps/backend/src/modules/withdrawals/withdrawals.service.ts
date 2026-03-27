@@ -7,7 +7,12 @@ import {
 } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
 import { JOB_NAMES, QUEUE_NAMES } from '../../config/queue.constants';
-import { coinsToUsd, usdToCoins } from '../../common/utils/coins.util';
+import {
+  coinsToUsd,
+  MIN_WITHDRAWAL_COINS,
+  NEW_USER_DAILY_WITHDRAWAL_CAP_COINS,
+  usdToCoins,
+} from '../../common/utils/coins.util';
 import { WithdrawRequestDto } from '../wallet/dto/withdraw-request.dto';
 import {
   Withdrawal,
@@ -31,7 +36,7 @@ export class WithdrawalsService {
   ) {}
 
   async requestWithdrawal(userId: string, dto: WithdrawRequestDto): Promise<Withdrawal> {
-    if (dto.coins < usdToCoins(5)) {
+    if (dto.coins < MIN_WITHDRAWAL_COINS) {
       throw new BadRequestException('Minimum withdrawal is $5');
     }
 
@@ -52,7 +57,7 @@ export class WithdrawalsService {
     const todayRequested = await this.withdrawalsRepository.totalRequestedToday(userId, start, end);
 
     const isNewUser = user.createdAt.getTime() > Date.now() - 14 * 24 * 60 * 60 * 1000;
-    if (isNewUser && todayRequested + dto.coins > usdToCoins(20)) {
+    if (isNewUser && todayRequested + dto.coins > NEW_USER_DAILY_WITHDRAWAL_CAP_COINS) {
       throw new BadRequestException('New user daily withdrawal limit is $20');
     }
 

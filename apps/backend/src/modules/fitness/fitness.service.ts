@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AuditService } from '../audit/audit.service';
 import { UsersService } from '../users/users.service';
-import { WalletTransactionType } from '../wallet/entities/wallet-transaction.entity';
 import { WalletService } from '../wallet/wallet.service';
 import { SyncActivityDto } from './dto/sync-activity.dto';
 import { ActivityDayRecord, UserActivityStats } from './entities/user-activity.entity';
@@ -39,6 +38,7 @@ export class FitnessService {
     const normalizedHistory = this.normalizeHistory(dto.weeklyHistory);
     const today =
       normalizedHistory[normalizedHistory.length - 1] ?? this.blankDay(dto.todayDateKey);
+    const trustedSource = this.isTrustedStepSource(dto.source);
 
     if (stats.todayDateKey !== dto.todayDateKey) {
       stats.rewardedCoinsToday = 0;
@@ -60,13 +60,15 @@ export class FitnessService {
     stats.trackingSource = dto.source;
     stats.trackingMessage = dto.message ?? null;
     stats.goalStreakDays = this.computeGoalStreak(normalizedHistory, stats.dailyGoalSteps);
-    stats.suspiciousActivityBlocked = suspicious;
-    stats.antiCheatMessage = suspicious
-      ? 'Activity looked unrealistic, so new walking rewards were held for review.'
-      : null;
+    stats.suspiciousActivityBlocked = suspicious || !trustedSource;
+    stats.antiCheatMessage = !trustedSource
+      ? 'Connect Health Connect or keep step-counter tracking active to unlock verified movement rewards.'
+      : suspicious
+          ? 'Activity looked unrealistic, so new walking rewards were held for review.'
+          : null;
 
     const boostActive = !!stats.stepBoostEndsAt && stats.stepBoostEndsAt.getTime() > Date.now();
-    if (!suspicious) {
+    if (!stats.suspiciousActivityBlocked) {
       const rewardableSteps = Math.min(today.steps, rankInfo.rankDailyCap);
       const completedBlocks = Math.floor(rewardableSteps / 1000);
       const previouslyRewardedBlocks = Math.floor(stats.rewardedStepsToday / 1000);
@@ -80,10 +82,9 @@ export class FitnessService {
         stats.rewardedStepsToday += rewardSteps;
         stats.rewardedCoinsToday += rewardCoins;
 
-        await this.walletService.addAvailableCoins(
+        await this.walletService.addPendingCoins(
           userId,
           rewardCoins,
-          WalletTransactionType.ADJUSTMENT,
           'MOVE_EARN',
           `${dto.todayDateKey}:${stats.rewardedStepsToday}`,
           { todaySteps: today.steps, boostActive },
@@ -105,7 +106,7 @@ export class FitnessService {
       this.usersService.getByIdOrFail(userId),
       this.ensureStats(userId),
     ]);
-    stats.stepBoostEndsAt = new Date(Date.now() + 30 * 60 * 1000);
+    stats.stepBoostEndsAt = new Date(Date.now() + 30 * 1000);
     await this.activityRepository.save(stats);
     await this.auditService.log(userId, 'MOVE_EARN_BOOST_ACTIVATED', 'USER', userId, {});
     return this.buildOverview(user.level, stats);
@@ -124,7 +125,7 @@ export class FitnessService {
         todayDateKey: today,
         weeklyHistory: this.buildBlankWeek(today),
         trackingStatus: 'unknown',
-        trackingSource: 'device_sensor',
+        trackingSource: 'step_counter',
       }),
     );
   }
@@ -273,6 +274,15 @@ export class FitnessService {
     }
     const speedKmPerHour = day.distanceKm / (day.activeMinutes / 60);
     return speedKmPerHour > 18 || (day.steps > 25000 && day.activeMinutes < 45);
+  }
+
+  private isTrustedStepSource(source: string): boolean {
+    const normalized = source.toLowerCase();
+    return (
+      normalized.includes('health_connect') ||
+      normalized.includes('android_foreground_service') ||
+      normalized.includes('step_counter')
+    );
   }
 
   private computeGoalStreak(history: ActivityDayRecord[], goal: number): number {

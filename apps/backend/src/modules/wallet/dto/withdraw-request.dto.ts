@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt, IsString, Min } from 'class-validator';
+import { MIN_WITHDRAWAL_COINS } from '../../../common/utils/coins.util';
 import { WithdrawalMethod } from '../../withdrawals/entities/withdrawal.entity';
 
 export class WithdrawRequestDto {
@@ -13,6 +14,6 @@ export class WithdrawRequestDto {
 
   @ApiProperty({ description: 'Coin amount' })
   @IsInt()
-  @Min(5000)
+  @Min(MIN_WITHDRAWAL_COINS)
   coins!: number;
 }

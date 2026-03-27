@@ -4,6 +4,9 @@ import { User } from '../../users/entities/user.entity';
 
 export enum WithdrawalMethod {
   PAYPAL = 'PAYPAL',
+  UPI = 'UPI',
+  SKRILL = 'SKRILL',
+  BANK_TRANSFER = 'BANK_TRANSFER',
   USDT = 'USDT',
   GIFT_CARD = 'GIFT_CARD',
 }

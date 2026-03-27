@@ -12,7 +12,12 @@
           "package_name": "com.velorastudios.earndash"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "889132772936-bcfo6pee8omn1dju6gqaeot4d4hbncnd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyCPzOvwBUjy70dEFzCJhrtVcrvMgjoEljk"
@@ -20,7 +25,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "889132772936-bcfo6pee8omn1dju6gqaeot4d4hbncnd.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

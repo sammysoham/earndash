@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../ads/presentation/banner_ad_strip.dart';
 import '../../ads/presentation/rewarded_ad_panel.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../gamification/presentation/gamification_page.dart';
@@ -44,14 +45,14 @@ class HomeOverviewPage extends ConsumerWidget {
                       color: const Color(0x2027FF87),
                       borderRadius: BorderRadius.circular(999),
                     ),
-                    child: const Text('Live demo workspace', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFFB9FFD6))),
+                    child: const Text('Daily earning hub', style: TextStyle(fontWeight: FontWeight.w700, color: Color(0xFFB9FFD6))),
                   ),
                   const SizedBox(height: 18),
                   Text('Welcome, ${session?.user.displayName ?? 'earner'}', style: TextStyle(fontSize: isCompact ? 30 : 40, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 12),
                   Text(
                     session?.user.isAdmin == true
-                        ? 'Monitor balances, test reward loops, and review admin-facing health from one greener control room.'
+                        ? 'Monitor balances, review account health, and manage the platform from one greener control room.'
                         : 'Mix Move & Earn with rewarded videos, grow your wallet, and keep daily streak momentum alive.',
                     style: const TextStyle(color: Color(0xFF9CB1AA), height: 1.6),
                   ),
@@ -96,13 +97,13 @@ class HomeOverviewPage extends ConsumerWidget {
                 _FeatureCallout(
                   eyebrow: 'Move live',
                   title: 'Walking and running now power a real daily earn loop.',
-                  body: 'Track steps, hit safe caps, stack streaks, and trigger a temporary 2x boost from rewarded ads.',
+                  body: 'Track verified steps, hit safe caps, stack streaks, and trigger a short 2x boost from rewarded videos.',
                   accent: const Color(0xFF00E676),
                 ),
                 _FeatureCallout(
                   eyebrow: 'Safe payouts',
                   title: 'Track pending, withdrawable, and lifetime earnings in one place.',
-                  body: 'The wallet stays synced with reward settlement, XP updates, and payout requests.',
+                  body: 'New rewards stay pending for 14 days before moving into your withdrawable balance.',
                   accent: const Color(0xFF79FFAE),
                 ),
                 _FeatureCallout(
@@ -113,6 +114,8 @@ class HomeOverviewPage extends ConsumerWidget {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+            const BannerAdStrip(),
             const SizedBox(height: 24),
             Wrap(
               spacing: 16,
@@ -132,12 +135,12 @@ class HomeOverviewPage extends ConsumerWidget {
                 SizedBox(
                   width: isCompact ? double.infinity : (constraints.maxWidth - 16) / 2,
                   child: const _ActionPanel(
-                    title: 'Demo notes',
+                    title: 'How EarnDash works',
                     lines: [
-                      'Move & Earn is now live with safe daily caps and streak bonuses.',
-                      'Rewarded videos are the primary live earn flow.',
-                      'Offerwalls are visible as coming soon.',
-                      'Admin demo exposes analytics cards and fraud-sensitive metrics.',
+                      'Move & Earn rewards healthy activity with safe daily limits.',
+                      'Rewarded videos add fast coins straight into your wallet.',
+                      'Offer partners unlock more earning options over time.',
+                      'Withdrawals, analytics, and account safety stay connected in one place.',
                     ],
                   ),
                 ),

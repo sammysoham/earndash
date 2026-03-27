@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/models/wallet_summary.dart';
+import '../../ads/presentation/banner_ad_strip.dart';
+import '../../ads/presentation/rewarded_ad_panel.dart';
 import '../../admin/presentation/admin_page.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../gamification/presentation/gamification_page.dart';
@@ -45,10 +47,10 @@ class WalletPage extends ConsumerWidget {
                   child: isCompact
                       ? Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Settle pending rewards', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                        children: [
+                            const Text('Refresh cleared rewards', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                             const SizedBox(height: 8),
-                            const Text('Demo mode shortcut: move all pending coins to withdrawable so you can test the payout flow.'),
+                            const Text('Move any rewards that have completed their hold period into your withdrawable balance.'),
                             const SizedBox(height: 16),
                             FilledButton.tonal(
                               onPressed: () async {
@@ -59,11 +61,11 @@ class WalletPage extends ConsumerWidget {
                                 ref.invalidate(gamificationProfileProvider);
                                 if (context.mounted) {
                                   messenger.showSnackBar(
-                                    SnackBar(content: Text(settled == 0 ? 'No pending rewards to settle' : '$settled coins are now withdrawable')),
+                                    SnackBar(content: Text(settled == 0 ? 'No pending rewards are ready yet' : '$settled rewards are now withdrawable')),
                                   );
                                 }
                               },
-                              child: const Text('Settle now'),
+                              child: const Text('Check pending rewards'),
                             ),
                           ],
                         )
@@ -73,9 +75,9 @@ class WalletPage extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('Settle pending rewards', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                                  Text('Refresh cleared rewards', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                                   SizedBox(height: 8),
-                                  Text('Demo mode shortcut: move all pending coins to withdrawable so you can test the payout flow.'),
+                                  Text('Move any rewards that have completed their hold period into your withdrawable balance.'),
                                 ],
                               ),
                             ),
@@ -88,15 +90,23 @@ class WalletPage extends ConsumerWidget {
                                 ref.invalidate(gamificationProfileProvider);
                                 if (context.mounted) {
                                   messenger.showSnackBar(
-                                    SnackBar(content: Text(settled == 0 ? 'No pending rewards to settle' : '$settled coins are now withdrawable')),
+                                    SnackBar(content: Text(settled == 0 ? 'No pending rewards are ready yet' : '$settled rewards are now withdrawable')),
                                   );
                                 }
                               },
-                              child: const Text('Settle now'),
+                              child: const Text('Check pending rewards'),
                             ),
                           ],
                         ),
                 ),
+                const SizedBox(height: 24),
+                const CompactRewardedAdCard(
+                  title: 'Top up your wallet faster',
+                  body: 'Watch a quick rewarded video to add more coins into your pending balance while your older rewards keep clearing.',
+                  highlight: 'Wallet ads',
+                ),
+                const SizedBox(height: 24),
+                const BannerAdStrip(),
                 const SizedBox(height: 24),
                 const Text('Recent transactions', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 12),

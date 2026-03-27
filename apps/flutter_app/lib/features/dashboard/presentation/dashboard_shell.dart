@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/widgets/brand_logo.dart';
+import '../../ads/logic/interstitial_ad_service.dart';
 import '../../auth/logic/auth_controller.dart';
 
-class DashboardShell extends ConsumerWidget {
+class DashboardShell extends ConsumerStatefulWidget {
   const DashboardShell({required this.child, super.key});
 
   final Widget child;
@@ -22,10 +23,27 @@ class DashboardShell extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<DashboardShell> createState() => _DashboardShellState();
+}
+
+class _DashboardShellState extends ConsumerState<DashboardShell> {
+  Future<void> _navigateTo(String path) async {
+    final currentPath = GoRouterState.of(context).uri.path;
+    if (currentPath == path) {
+      return;
+    }
+
+    context.go(path);
+    await ref.read(interstitialAdServiceProvider).maybeShowAfterNavigation();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final session = ref.watch(authControllerProvider).value;
     final location = GoRouterState.of(context).uri.path;
-    final items = session?.user.isAdmin == true ? _items : _items.where((item) => item.path != '/admin').toList();
+    final items = session?.user.isAdmin == true
+        ? DashboardShell._items
+        : DashboardShell._items.where((item) => item.path != '/admin').toList();
 
     return Scaffold(
       body: SafeArea(
@@ -79,7 +97,7 @@ class DashboardShell extends ConsumerWidget {
                                         avatar: Icon(item.icon, size: 18),
                                         label: Text(item.label),
                                         selected: location == item.path,
-                                        onSelected: (_) => context.go(item.path),
+                                        onSelected: (_) => _navigateTo(item.path),
                                       ),
                                     ),
                                 ],
@@ -91,7 +109,7 @@ class DashboardShell extends ConsumerWidget {
                   Expanded(
                     child: Padding(
                       padding: const EdgeInsets.all(16),
-                      child: child,
+                      child: widget.child,
                     ),
                   ),
                 ],
@@ -124,7 +142,7 @@ class DashboardShell extends ConsumerWidget {
                             selectedTileColor: const Color(0x1A59F3C3),
                             leading: Icon(item.icon),
                             title: Text(item.label),
-                            onTap: () => context.go(item.path),
+                            onTap: () => _navigateTo(item.path),
                           ),
                         ),
                       const Spacer(),
@@ -143,7 +161,7 @@ class DashboardShell extends ConsumerWidget {
                 Expanded(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(0, 20, 20, 20),
-                    child: child,
+                    child: widget.child,
                   ),
                 ),
               ],

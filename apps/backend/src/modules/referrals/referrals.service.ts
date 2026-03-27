@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { WalletTransactionType } from '../wallet/entities/wallet-transaction.entity';
 import { WalletService } from '../wallet/wallet.service';
 import { OfferCompletion } from '../offerwall/entities/offer-completion.entity';
 import { ReferralsRepository } from './repositories/referrals.repository';
@@ -57,10 +56,9 @@ export class ReferralsService {
     referral.lifetimeCommissionCoins += commissionCoins;
     await this.referralsRepository.save(referral);
 
-    await this.walletService.addAvailableCoins(
+    await this.walletService.addPendingCoins(
       referral.referrerId,
       commissionCoins,
-      WalletTransactionType.REFERRAL_BONUS,
       'REFERRAL_PAYOUT',
       completion.id,
       { referredUserId: completion.userId },

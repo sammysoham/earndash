@@ -146,7 +146,7 @@ class ActivityTrackingService {
     var message = prefs.getString(_messageKey);
     var supported = _supported;
     var permissionGranted = _permissionGranted;
-    var source = 'device_sensor';
+    var source = 'step_counter';
 
     var weeklyHistory = _buildWeeklyHistory(
       todayDateKey: todayDateKey,

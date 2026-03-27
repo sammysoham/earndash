@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { coinsToUsd } from '../../common/utils/coins.util';
 import { UsersRepository } from '../users/repositories/users.repository';
 import { OfferCompletionsRepository } from '../offerwall/repositories/offer-completions.repository';
 import { WithdrawalsRepository } from '../withdrawals/repositories/withdrawals.repository';
@@ -42,7 +43,7 @@ export class AnalyticsService {
     ]);
 
     const lifetimeCoins = walletRows.reduce((sum, wallet) => sum + wallet.lifetimeEarned, 0);
-    const revenuePerUserUsd = totalUsers > 0 ? Number(((lifetimeCoins / 1000) / totalUsers).toFixed(2)) : 0;
+    const revenuePerUserUsd = totalUsers > 0 ? Number((coinsToUsd(lifetimeCoins) / totalUsers).toFixed(2)) : 0;
     const averageLtvUsd = revenuePerUserUsd;
 
     return {

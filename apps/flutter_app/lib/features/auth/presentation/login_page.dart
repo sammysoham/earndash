@@ -14,8 +14,12 @@ class LoginPage extends ConsumerStatefulWidget {
 }
 
 class _LoginPageState extends ConsumerState<LoginPage> {
-  final _emailController = TextEditingController(text: 'admin@earndash.dev');
-  final _passwordController = TextEditingController(text: 'password123');
+  final _emailController = TextEditingController(
+    text: AppConstants.useMockApi ? 'admin@earndash.dev' : '',
+  );
+  final _passwordController = TextEditingController(
+    text: AppConstants.useMockApi ? 'password123' : '',
+  );
   final _displayNameController = TextEditingController(text: 'Soham');
   final _referralCodeController = TextEditingController();
   bool _isSignup = false;
@@ -57,7 +61,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ? Row(
                           crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            Expanded(child: _MarketingPanel()),
+                            const Expanded(child: _MarketingPanel()),
                             const SizedBox(width: 32),
                             Expanded(child: _AuthCard(
                               isSignup: _isSignup,
@@ -148,18 +152,18 @@ class _MarketingPanel extends StatelessWidget {
           end: Alignment.bottomRight,
         ),
       ),
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          EarndashBrand(),
-          SizedBox(height: 16),
-          Text(
-            'A greener rewards MVP with rewarded videos, stronger admin controls, referrals, wallets, and launch-ready user flows.',
+          const EarndashBrand(),
+          const SizedBox(height: 16),
+          const Text(
+            'Earn through daily movement, rewarded videos, referrals, and a wallet built to keep every coin easy to track.',
             style: TextStyle(fontSize: 18, color: Color(0xFF9CB1AA), height: 1.5),
           ),
-          SizedBox(height: 24),
-          Wrap(
+          const SizedBox(height: 24),
+          const Wrap(
             spacing: 12,
             runSpacing: 12,
             children: [
@@ -169,12 +173,23 @@ class _MarketingPanel extends StatelessWidget {
               _MiniBadge(label: 'Referrals'),
             ],
           ),
-          SizedBox(height: 24),
-          Text('Quick test accounts', style: TextStyle(fontWeight: FontWeight.w700)),
-          SizedBox(height: 8),
-          Text('Admin: admin@earndash.dev / password123'),
-          SizedBox(height: 4),
-          Text('User: sara@earndash.dev / password123'),
+          const SizedBox(height: 24),
+            Text(
+              AppConstants.useMockApi ? 'Quick test accounts' : 'Real backend mode',
+              style: const TextStyle(fontWeight: FontWeight.w700),
+            ),
+          const SizedBox(height: 8),
+          Text(
+              AppConstants.useMockApi
+                ? 'Admin: admin@earndash.dev / password123'
+                : 'Create your account to start earning and tracking your progress.',
+            ),
+          const SizedBox(height: 4),
+          Text(
+            AppConstants.useMockApi
+                ? 'User: sara@earndash.dev / password123'
+                : 'Google sign-in is also available on supported devices.',
+          ),
         ],
       ),
     );
@@ -245,7 +260,7 @@ class _AuthCard extends StatelessWidget {
             Text(
               AppConstants.useMockApi
                   ? 'Email login works offline for the MVP, and Google sign-in now uses Firebase on supported devices.'
-                  : 'Use your real account, or sign in with Google through Firebase.',
+                  : 'Sign in with your email or continue with Google to access your wallet, offers, and activity rewards.',
             ),
             const SizedBox(height: 24),
             if (isSignup) ...[
@@ -284,7 +299,7 @@ class _AuthCard extends StatelessWidget {
               const SizedBox(height: 12),
             ] else ...[
               const Text(
-                'Firebase auth is scaffolded and ready. Add your Firebase config values, then flip `firebaseAuthEnabled` to turn on Google sign-in.',
+                'Google sign-in will appear automatically on devices where Firebase login is enabled.',
                 style: TextStyle(color: Color(0xFF8FAE99), height: 1.5),
               ),
               const SizedBox(height: 12),

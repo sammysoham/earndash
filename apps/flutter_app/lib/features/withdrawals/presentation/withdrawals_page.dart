@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/constants/app_constants.dart';
 import '../../../core/notifications/local_notifications_service.dart';
 import '../../admin/presentation/admin_page.dart';
 import '../../auth/logic/auth_controller.dart';
@@ -13,8 +14,8 @@ class WithdrawalsPage extends ConsumerStatefulWidget {
 }
 
 class _WithdrawalsPageState extends ConsumerState<WithdrawalsPage> {
-  final _destinationController = TextEditingController(text: 'demo@paypal.test');
-  final _coinsController = TextEditingController(text: '5000');
+  final _destinationController = TextEditingController(text: 'your-paypal@email.com');
+  final _coinsController = TextEditingController(text: '${AppConstants.minWithdrawalCoins}');
   String _method = 'PAYPAL';
   bool _submitting = false;
 
@@ -42,13 +43,18 @@ class _WithdrawalsPageState extends ConsumerState<WithdrawalsPage> {
               children: [
                 const Text('Request payout', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w700)),
                 const SizedBox(height: 8),
-                const Text('Minimum: 5,000 coins. New users are capped at 20,000 coins per day.'),
+                Text(
+                  'Minimum: ${AppConstants.minWithdrawalCoins} coins. New users are capped at ${AppConstants.newUserDailyWithdrawalCapCoins} coins per day.',
+                ),
                 const SizedBox(height: 20),
                 DropdownButtonFormField<String>(
                   initialValue: _method,
                   decoration: const InputDecoration(labelText: 'Method'),
                   items: const [
                     DropdownMenuItem(value: 'PAYPAL', child: Text('PayPal')),
+                    DropdownMenuItem(value: 'UPI', child: Text('UPI')),
+                    DropdownMenuItem(value: 'SKRILL', child: Text('Skrill')),
+                    DropdownMenuItem(value: 'BANK_TRANSFER', child: Text('Bank transfer')),
                     DropdownMenuItem(value: 'USDT', child: Text('USDT')),
                     DropdownMenuItem(value: 'GIFT_CARD', child: Text('Gift card')),
                   ],
@@ -107,11 +113,11 @@ class _WithdrawalsPageState extends ConsumerState<WithdrawalsPage> {
               children: [
                 Text('Conversion', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
                 SizedBox(height: 12),
-                Text('1,000 coins = 1 USD'),
+                Text('10,000 coins = 1 USD'),
                 SizedBox(height: 8),
-                Text('5,000 coins = 5 USD minimum payout'),
+                Text('${AppConstants.minWithdrawalCoins} coins = 5 USD minimum payout'),
                 SizedBox(height: 8),
-                Text('20,000 coins = 20 USD new user daily cap'),
+                Text('${AppConstants.newUserDailyWithdrawalCapCoins} coins = 20 USD new user daily cap'),
               ],
             ),
           ),

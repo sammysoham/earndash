@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +6,8 @@ import '../../../core/models/fitness_models.dart';
 import '../../../core/notifications/local_notifications_service.dart';
 import '../../../core/widgets/coin_reward_celebration.dart';
 import '../../ads/logic/rewarded_ad_service.dart';
+import '../../ads/presentation/banner_ad_strip.dart';
+import '../../ads/presentation/rewarded_ad_panel.dart';
 import '../../admin/presentation/admin_page.dart';
 import '../../auth/logic/auth_controller.dart';
 import '../../gamification/presentation/gamification_page.dart';
@@ -24,6 +27,24 @@ class MoveEarnPage extends ConsumerStatefulWidget {
 class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
   bool _syncing = false;
   bool _boosting = false;
+  Timer? _ticker;
+  DateTime _countdownNow = DateTime.now();
+
+  @override
+  void initState() {
+    super.initState();
+    _ticker = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (mounted) {
+        setState(() => _countdownNow = DateTime.now());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _ticker?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +63,7 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                 _MoveHero(
                   data: data,
                   isCompact: isCompact,
+                  boostCountdownText: _boostCountdownText(data.stepBoostEndsAt),
                   onWalkSync: _syncing ? null : () => _syncActivity(data),
                   onRunSync: _syncing ? null : () => _refreshOverview(),
                   onBoost: _boosting ? null : () => _activateBoost(),
@@ -81,6 +103,14 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 24),
+                const CompactRewardedAdCard(
+                  title: 'Need a coin boost while you move?',
+                  body: 'Use a rewarded video to activate a short 2x step multiplier while your verified movement rewards keep building.',
+                  highlight: 'Move booster',
+                ),
+                const SizedBox(height: 24),
+                const BannerAdStrip(),
                 const SizedBox(height: 24),
                 Wrap(
                   spacing: 16,
@@ -235,13 +265,13 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
         await LocalNotificationsService.instance.showRewardEarned(
           coins: adReward,
           title: 'Step boost activated',
-          body: '2x multiplier is live for 30 minutes.',
+          body: '2x multiplier is live for 30 seconds.',
         );
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('2x step boost is live for 30 minutes. Ad reward: +$adReward coins'),
+            content: Text('2x step boost is live for 30 seconds. Video reward: +$adReward pending coins'),
           ),
         );
       }
@@ -251,12 +281,27 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
       }
     }
   }
+
+  String _boostCountdownText(DateTime? endsAt) {
+    if (endsAt == null) {
+      return '';
+    }
+
+    final remaining = endsAt.difference(_countdownNow);
+    if (remaining.inSeconds <= 0) {
+      return 'Boost ready';
+    }
+
+    final seconds = remaining.inSeconds.toString().padLeft(2, '0');
+    return '2x boost active • $seconds s left';
+  }
 }
 
 class _MoveHero extends StatelessWidget {
   const _MoveHero({
     required this.data,
     required this.isCompact,
+    required this.boostCountdownText,
     required this.onWalkSync,
     required this.onRunSync,
     required this.onBoost,
@@ -264,6 +309,7 @@ class _MoveHero extends StatelessWidget {
 
   final MoveEarnOverview data;
   final bool isCompact;
+  final String boostCountdownText;
   final VoidCallback? onWalkSync;
   final VoidCallback? onRunSync;
   final VoidCallback? onBoost;
@@ -314,7 +360,7 @@ class _MoveHero extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Walking, running, step boosts, streaks, and anti-cheat controls now sit inside one greener fitness workspace.',
+            'Walking, running, verified step tracking, short boost windows, streaks, and anti-cheat controls now work together in one fitness workspace.',
             style: TextStyle(color: Color(0xFF9FD5AF), height: 1.6),
           ),
           const SizedBox(height: 22),
@@ -372,7 +418,7 @@ class _MoveHero extends StatelessWidget {
                           onPressed: onBoost,
                           icon: const Icon(Icons.ondemand_video_rounded),
                           label: Text(
-                            data.stepBoostActive ? '2x boost active' : 'Watch ad for boost',
+                            data.stepBoostActive ? 'Boost running' : 'Watch ad for boost',
                           ),
                         ),
                       ],
@@ -380,7 +426,7 @@ class _MoveHero extends StatelessWidget {
                     const SizedBox(height: 14),
                     Text(
                       data.stepBoostActive && data.stepBoostEndsAt != null
-                          ? '2x step boost active until ${_timeLabel(data.stepBoostEndsAt!)}'
+                          ? boostCountdownText
                           : '1,000 steps = 10 coins with a safe daily cap to limit farming.',
                       style: TextStyle(
                         color: data.stepBoostActive
@@ -847,7 +893,7 @@ class _RankCard extends StatelessWidget {
             children: [
               _RankMeta(label: 'Daily cap', value: '${data.rankDailyCap} steps'),
               _RankMeta(label: 'Multiplier', value: '${data.rankMultiplier.toStringAsFixed(1)}x'),
-              _RankMeta(label: 'Boost', value: data.stepBoostActive ? '2x live' : 'Ready'),
+              _RankMeta(label: 'Boost', value: data.stepBoostActive ? '30s live' : 'Ready'),
               _RankMeta(label: 'Goal streak', value: '${data.goalStreakDays} days'),
             ],
           ),
@@ -1043,10 +1089,4 @@ class _GuardrailPill extends StatelessWidget {
       child: Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
     );
   }
-}
-
-String _timeLabel(DateTime value) {
-  final hour = value.hour.toString().padLeft(2, '0');
-  final minute = value.minute.toString().padLeft(2, '0');
-  return '$hour:$minute';
 }

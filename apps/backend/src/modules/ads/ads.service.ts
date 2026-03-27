@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { ConfirmAdRewardDto } from './dto/confirm-ad-reward.dto';
 import { AdReward } from './entities/ad-reward.entity';
 import { WalletService } from '../wallet/wallet.service';
-import { WalletTransactionType } from '../wallet/entities/wallet-transaction.entity';
 import { AuditService } from '../audit/audit.service';
 import { FraudService } from '../fraud/fraud.service';
 import { GamificationService } from '../gamification/gamification.service';
@@ -21,7 +20,7 @@ export class AdsService {
   ) {}
 
   async confirmReward(userId: string, dto: ConfirmAdRewardDto) {
-    if (dto.coins < 5 || dto.coins > 30) {
+    if (dto.coins < 5 || dto.coins > 20) {
       throw new BadRequestException('Ad reward amount is outside the allowed range');
     }
 
@@ -41,10 +40,9 @@ export class AdsService {
       }),
     );
 
-    await this.walletService.addAvailableCoins(
+    await this.walletService.addPendingCoins(
       userId,
       dto.coins,
-      WalletTransactionType.AD_REWARD,
       'AD_REWARD',
       reward.id,
       { adUnitId: dto.adUnitId, placement: dto.placement ?? null },

@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:dio/dio.dart';
 import '../../../core/auth/firebase_auth_service.dart';
 import '../../../core/fitness/activity_tracking_service.dart';
 import '../../../core/models/user_session.dart';
@@ -56,7 +57,7 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
       await _ref.read(authStorageProvider).saveToken(session.accessToken);
       state = AsyncData(session);
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      state = AsyncError(_readableAuthError(error), stackTrace);
     }
   }
 
@@ -79,7 +80,7 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
       await _ref.read(authStorageProvider).saveToken(session.accessToken);
       state = AsyncData(session);
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      state = AsyncError(_readableAuthError(error), stackTrace);
     }
   }
 
@@ -105,7 +106,7 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
       await _ref.read(authStorageProvider).saveToken(session.accessToken);
       state = AsyncData(session);
     } catch (error, stackTrace) {
-      state = AsyncError(error, stackTrace);
+      state = AsyncError(_readableAuthError(error), stackTrace);
     }
   }
 
@@ -114,6 +115,30 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
     await _ref.read(firebaseAuthServiceProvider).signOutIfNeeded();
     _ref.read(apiClientProvider).setAccessToken(null);
     state = const AsyncData(null);
+  }
+
+  String _readableAuthError(Object error) {
+    if (error is DioException) {
+      final data = error.response?.data;
+      if (data is Map && data['message'] is String) {
+        return data['message'] as String;
+      }
+
+      switch (error.response?.statusCode) {
+        case 400:
+          return 'Please check your details and try again.';
+        case 401:
+          return 'Wrong email or password.';
+        case 403:
+          return 'This account is blocked right now.';
+        case 409:
+          return 'That account already exists.';
+        default:
+          break;
+      }
+    }
+
+    return 'Something went wrong. Please try again.';
   }
 }
 

@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { GoogleMobileLoginDto } from './dto/google-mobile-login.dto';
+import { FirebaseAdminService } from '../../common/firebase/firebase-admin.service';
 import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
 import { FraudService } from '../fraud/fraud.service';
@@ -41,6 +42,7 @@ export class AuthService {
     private readonly gamificationService: GamificationService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly firebaseAdminService: FirebaseAdminService,
   ) {
     this.googleClient = new OAuth2Client(configService.get<string>('googleClientId'));
   }
@@ -136,6 +138,36 @@ export class AuthService {
 
   async loginWithGoogleToken(dto: GoogleMobileLoginDto, context: AuthContext) {
     if (dto.idToken) {
+      if (this.firebaseAdminService.isConfigured) {
+        try {
+          const decoded = await this.firebaseAdminService.verifyIdToken(dto.idToken);
+          const email = decoded.email ?? dto.email;
+          const googleId = decoded.uid || decoded.sub;
+          const displayName = decoded.name ?? dto.displayName ?? email?.split('@')[0];
+          if (!email || !googleId || !displayName) {
+            throw new UnauthorizedException('Firebase token missing profile details');
+          }
+
+          return this.loginOrProvisionGoogleUser(
+            {
+              email,
+              googleId,
+              displayName,
+            },
+            {
+              ...context,
+              deviceFingerprint: dto.deviceFingerprint,
+              deviceType: dto.deviceType,
+              advertisingId: dto.advertisingId,
+            },
+          );
+        } catch (error) {
+          if (!this.configService.get<string>('googleClientId')) {
+            throw new UnauthorizedException('Firebase token could not be verified');
+          }
+        }
+      }
+
       const ticket = await this.googleClient.verifyIdToken({
         idToken: dto.idToken,
         audience: this.configService.get<string>('googleClientId'),

@@ -25,6 +25,7 @@ import { FraudService } from '../fraud/fraud.service';
 import { ReferralsService } from '../referrals/referrals.service';
 import { AuditService } from '../audit/audit.service';
 import { GamificationService } from '../gamification/gamification.service';
+import { PENDING_REWARD_HOLD_DAYS } from '../../common/utils/coins.util';
 
 @Injectable()
 export class OfferwallService {
@@ -138,7 +139,7 @@ export class OfferwallService {
 
     const user = await this.usersService.getByIdOrFail(dto.user_id);
     const isSuccessful = ['approved', 'completed', 'complete'].includes(dto.status.toLowerCase());
-    const holdUntil = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+    const holdUntil = new Date(Date.now() + PENDING_REWARD_HOLD_DAYS * 24 * 60 * 60 * 1000);
 
     const completion = await this.offerCompletionsRepository.save(
       this.offerCompletionsRepository.create({

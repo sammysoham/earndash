@@ -51,14 +51,15 @@ class FirebaseAuthService {
     if (user?.email == null) {
       throw Exception('Firebase did not return an email address.');
     }
+    final firebaseIdToken = await user!.getIdToken();
 
     return FirebaseIdentity(
-      email: user!.email!,
+      email: user.email!,
       displayName: user.displayName?.trim().isNotEmpty == true
           ? user.displayName!.trim()
           : user.email!.split('@').first,
       providerUserId: user.uid,
-      idToken: googleAuth.idToken,
+      idToken: firebaseIdToken,
     );
   }
 

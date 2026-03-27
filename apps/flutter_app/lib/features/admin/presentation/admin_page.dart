@@ -123,7 +123,7 @@ class _AdminPageState extends ConsumerState<AdminPage> {
               ),
               SizedBox(height: 12),
               Text(
-                'You can now review users, approve or reject withdrawal requests, gift test coins, and block suspicious accounts directly in the app.',
+                'Review users, approve or reject withdrawal requests, gift coins, and block suspicious accounts directly in the app.',
               ),
             ],
           ),

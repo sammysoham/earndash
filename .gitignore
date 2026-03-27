@@ -12,3 +12,5 @@ apps/flutter_app/.idea
 coverage
 .DS_Store
 .env
+*firebase-adminsdk*.json
+*google-services*.json

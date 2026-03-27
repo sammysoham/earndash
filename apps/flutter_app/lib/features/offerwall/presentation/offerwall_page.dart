@@ -18,7 +18,7 @@ class OfferwallPage extends StatelessWidget {
       ),
       _ComingSoonOfferwall(
         name: 'More providers',
-        subtitle: 'Additional offerwalls will be enabled after launch review',
+        subtitle: 'More earning partners will unlock over time',
         accent: Color(0xFFFF8FCF),
       ),
     ];
@@ -40,10 +40,10 @@ class OfferwallPage extends StatelessWidget {
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Offerwalls are coming soon', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800)),
+                Text('Offer partners are on the way', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w800)),
                 SizedBox(height: 10),
                 Text(
-                  'We are finalizing provider setup, quality checks, and reward validation. For now, users can earn coins through rewarded videos.',
+                  'New offer partners are being added to bring surveys, installs, and featured tasks into EarnDash. Until then, you can keep earning through rewarded videos and movement rewards.',
                   style: TextStyle(color: Color(0xFF9CB1AA), height: 1.5),
                 ),
               ],
@@ -66,11 +66,11 @@ class OfferwallPage extends StatelessWidget {
             child: const Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Current live earning method', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                Text('Available right now', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
                 SizedBox(height: 12),
-                Text('Rewarded video ads are live in the Watch & Earn tab.'),
+                Text('Rewarded videos are live in the Watch & Earn tab.'),
                 SizedBox(height: 8),
-                Text('Offerwalls will unlock after provider approval, postback validation, and payout testing.'),
+                Text('Move & Earn also helps you build coins through daily activity, goals, and streaks.'),
               ],
             ),
           ),
@@ -143,7 +143,7 @@ class _ComingSoonCard extends StatelessWidget {
               color: card.accent.withValues(alpha: 0.12),
             ),
             child: Text(
-              'Soon',
+              'Upcoming',
               style: TextStyle(
                 color: card.accent,
                 fontWeight: FontWeight.w700,

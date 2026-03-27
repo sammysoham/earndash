@@ -9,6 +9,7 @@ import {
   WalletTransactionStatus,
   WalletTransactionType,
 } from './entities/wallet-transaction.entity';
+import { PENDING_REWARD_HOLD_DAYS } from '../../common/utils/coins.util';
 
 @Injectable()
 export class WalletService {
@@ -70,6 +71,7 @@ export class WalletService {
       wallet.pendingCoins += coins;
       wallet.lifetimeEarned += coins;
       const savedWallet = await walletRepository.save(wallet);
+      const releaseAt = new Date(Date.now() + PENDING_REWARD_HOLD_DAYS * 24 * 60 * 60 * 1000);
 
       await transactionRepository.save(
         transactionRepository.create({
@@ -81,9 +83,58 @@ export class WalletService {
           usdAmount: coinsToUsd(coins).toFixed(2),
           referenceType,
           referenceId,
-          metadata: metadata ?? null,
+          metadata: {
+            ...(metadata ?? {}),
+            releaseAt: releaseAt.toISOString(),
+          },
         }),
       );
+    });
+  }
+
+  async releasePendingTransaction(transactionId: string): Promise<WalletTransaction | null> {
+    return this.dataSource.transaction(async (manager) => {
+      const walletRepository = manager.getRepository(Wallet);
+      const transactionRepository = manager.getRepository(WalletTransaction);
+
+      const pendingTransaction = await transactionRepository.findOne({
+        where: {
+          id: transactionId,
+          type: WalletTransactionType.CREDIT_PENDING,
+          status: WalletTransactionStatus.PENDING,
+        },
+      });
+
+      if (!pendingTransaction || pendingTransaction.coins <= 0) {
+        return null;
+      }
+
+      const wallet = await walletRepository.findOneByOrFail({ userId: pendingTransaction.userId });
+      wallet.pendingCoins = Math.max(0, wallet.pendingCoins - pendingTransaction.coins);
+      wallet.withdrawableCoins += pendingTransaction.coins;
+      const savedWallet = await walletRepository.save(wallet);
+
+      pendingTransaction.status = WalletTransactionStatus.COMPLETED;
+      await transactionRepository.save(pendingTransaction);
+
+      await transactionRepository.save(
+        transactionRepository.create({
+          walletId: savedWallet.id,
+          userId: pendingTransaction.userId,
+          type: WalletTransactionType.RELEASE_PENDING,
+          status: WalletTransactionStatus.COMPLETED,
+          coins: pendingTransaction.coins,
+          usdAmount: coinsToUsd(pendingTransaction.coins).toFixed(2),
+          referenceType: pendingTransaction.referenceType,
+          referenceId: pendingTransaction.referenceId,
+          metadata: {
+            ...(pendingTransaction.metadata ?? {}),
+            releasedFromTransactionId: pendingTransaction.id,
+          },
+        }),
+      );
+
+      return pendingTransaction;
     });
   }
 
