@@ -49,6 +49,9 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
   @override
   Widget build(BuildContext context) {
     final overview = ref.watch(moveEarnProvider);
+    ref.watch(rewardedAdClockProvider);
+    final adCooldownEndsAt = ref.watch(rewardedAdCooldownProvider);
+    final adCooldownSeconds = _secondsUntilNextRewardedAd(adCooldownEndsAt);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Move & Earn')),
@@ -67,7 +70,12 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                   boostCountdownText: _boostCountdownText(data.stepBoostEndsAt),
                   onWalkSync: _syncing ? null : () => _syncActivity(data),
                   onRunSync: _syncing ? null : () => _refreshOverview(),
-                  onBoost: _boosting ? null : () => _activateBoost(),
+                  onBoost: _boosting || adCooldownSeconds > 0
+                      ? null
+                      : () => _activateBoost(),
+                  adCooldownText: adCooldownSeconds > 0
+                      ? 'Next rewarded boost video unlocks in ${adCooldownSeconds}s.'
+                      : '1,000 steps = 10 coins, and one rewarded video can activate a 2x multiplier for 30 seconds.',
                 ),
                 const SizedBox(height: 24),
                 Wrap(
@@ -323,6 +331,15 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
     final seconds = remaining.inSeconds.toString().padLeft(2, '0');
     return '2x boost active • $seconds s left';
   }
+
+  int _secondsUntilNextRewardedAd(DateTime? cooldownEndsAt) {
+    if (cooldownEndsAt == null) {
+      return 0;
+    }
+
+    final remaining = cooldownEndsAt.difference(_countdownNow).inSeconds;
+    return remaining > 0 ? remaining : 0;
+  }
 }
 
 class _MoveHero extends StatelessWidget {
@@ -330,6 +347,7 @@ class _MoveHero extends StatelessWidget {
     required this.data,
     required this.isCompact,
     required this.boostCountdownText,
+    required this.adCooldownText,
     required this.onWalkSync,
     required this.onRunSync,
     required this.onBoost,
@@ -338,6 +356,7 @@ class _MoveHero extends StatelessWidget {
   final MoveEarnOverview data;
   final bool isCompact;
   final String boostCountdownText;
+  final String adCooldownText;
   final VoidCallback? onWalkSync;
   final VoidCallback? onRunSync;
   final VoidCallback? onBoost;
@@ -462,7 +481,9 @@ class _MoveHero extends StatelessWidget {
                           label: Text(
                             data.stepBoostActive
                                 ? 'Boost running'
-                                : 'Watch ad for boost',
+                                : onBoost == null
+                                    ? 'Boost cooldown'
+                                    : 'Watch ad for boost',
                           ),
                         ),
                       ],
@@ -471,7 +492,7 @@ class _MoveHero extends StatelessWidget {
                     Text(
                       data.stepBoostActive && data.stepBoostEndsAt != null
                           ? boostCountdownText
-                          : '1,000 steps = 10 coins with a safe daily cap to limit farming.',
+                          : adCooldownText,
                       style: TextStyle(
                         color: data.stepBoostActive
                             ? const Color(0xFFC9FFC8)

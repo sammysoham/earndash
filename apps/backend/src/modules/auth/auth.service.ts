@@ -13,6 +13,7 @@ import { randomUUID } from 'crypto';
 import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { GoogleMobileLoginDto } from './dto/google-mobile-login.dto';
+import { UpdatePreferencesDto } from './dto/update-preferences.dto';
 import { FirebaseAdminService } from '../../common/firebase/firebase-admin.service';
 import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
@@ -305,6 +306,7 @@ export class AuthService {
         countryCode: user.countryCode,
         fraudScore: user.fraudScore,
         referralCode: user.referralCode,
+        showInLeaderboard: user.showInLeaderboard,
       },
     };
   }
@@ -320,6 +322,31 @@ export class AuthService {
         countryCode: user.countryCode,
         fraudScore: user.fraudScore,
         referralCode: user.referralCode,
+        showInLeaderboard: user.showInLeaderboard,
+      },
+    };
+  }
+
+  async updatePreferences(userId: string, dto: UpdatePreferencesDto) {
+    const user = await this.usersService.getByIdOrFail(userId);
+    if (typeof dto.showInLeaderboard === 'boolean') {
+      user.showInLeaderboard = dto.showInLeaderboard;
+    }
+    const savedUser = await this.usersService.save(user);
+    await this.auditService.log(userId, 'USER_PREFERENCES_UPDATED', 'USER', userId, {
+      showInLeaderboard: savedUser.showInLeaderboard,
+    });
+
+    return {
+      user: {
+        id: savedUser.id,
+        email: savedUser.email,
+        displayName: savedUser.displayName,
+        role: savedUser.role,
+        countryCode: savedUser.countryCode,
+        fraudScore: savedUser.fraudScore,
+        referralCode: savedUser.referralCode,
+        showInLeaderboard: savedUser.showInLeaderboard,
       },
     };
   }

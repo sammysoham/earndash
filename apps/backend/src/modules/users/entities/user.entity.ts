@@ -82,6 +82,9 @@ export class User extends AppBaseEntity {
   @Column({ name: 'daily_streak', type: 'int', default: 0 })
   dailyStreak!: number;
 
+  @Column({ name: 'show_in_leaderboard', default: false })
+  showInLeaderboard!: boolean;
+
   @Column({ name: 'last_login_at', type: 'timestamptz', nullable: true })
   lastLoginAt!: Date | null;
 }

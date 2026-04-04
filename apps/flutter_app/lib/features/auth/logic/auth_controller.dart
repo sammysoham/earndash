@@ -19,8 +19,10 @@ final apiClientProvider = Provider<ApiClient>(
 final authStorageProvider = Provider<AuthStorage>(
   (ref) => const AuthStorage(FlutterSecureStorage()),
 );
-final deviceIdentityProvider = Provider<DeviceIdentityService>((ref) => DeviceIdentityService());
-final firebaseAuthServiceProvider = Provider<FirebaseAuthService>((ref) => FirebaseAuthService());
+final deviceIdentityProvider =
+    Provider<DeviceIdentityService>((ref) => DeviceIdentityService());
+final firebaseAuthServiceProvider =
+    Provider<FirebaseAuthService>((ref) => FirebaseAuthService());
 
 class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
   AuthController(this._ref) : super(const AsyncLoading()) {
@@ -48,7 +50,8 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
   Future<void> login({required String email, required String password}) async {
     state = const AsyncLoading();
     try {
-      final deviceFingerprint = await _ref.read(deviceIdentityProvider).fingerprint();
+      final deviceFingerprint =
+          await _ref.read(deviceIdentityProvider).fingerprint();
       final session = await _ref.read(apiClientProvider).login(
             email: email,
             password: password,
@@ -66,16 +69,19 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
     required String password,
     required String displayName,
     String? referralCode,
+    bool acceptedTerms = true,
   }) async {
     state = const AsyncLoading();
     try {
-      final deviceFingerprint = await _ref.read(deviceIdentityProvider).fingerprint();
+      final deviceFingerprint =
+          await _ref.read(deviceIdentityProvider).fingerprint();
       final session = await _ref.read(apiClientProvider).signup(
             email: email,
             password: password,
             displayName: displayName,
             deviceFingerprint: deviceFingerprint,
             referralCode: referralCode,
+            acceptedTerms: acceptedTerms,
           );
       await _ref.read(authStorageProvider).saveToken(session.accessToken);
       state = AsyncData(session);
@@ -94,14 +100,17 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
   Future<void> loginWithGoogle() async {
     state = const AsyncLoading();
     try {
-      final identity = await _ref.read(firebaseAuthServiceProvider).signInWithGoogle();
-      final deviceFingerprint = await _ref.read(deviceIdentityProvider).fingerprint();
+      final identity =
+          await _ref.read(firebaseAuthServiceProvider).signInWithGoogle();
+      final deviceFingerprint =
+          await _ref.read(deviceIdentityProvider).fingerprint();
       final session = await _ref.read(apiClientProvider).loginWithGoogle(
             email: identity.email,
             displayName: identity.displayName,
             deviceFingerprint: deviceFingerprint,
             idToken: identity.idToken,
             googleId: identity.providerUserId,
+            acceptedTerms: true,
           );
       await _ref.read(authStorageProvider).saveToken(session.accessToken);
       state = AsyncData(session);
@@ -115,6 +124,30 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
     await _ref.read(firebaseAuthServiceProvider).signOutIfNeeded();
     _ref.read(apiClientProvider).setAccessToken(null);
     state = const AsyncData(null);
+  }
+
+  Future<void> updatePreferences({
+    required bool showInLeaderboard,
+  }) async {
+    final currentSession = state.value;
+    if (currentSession == null) {
+      return;
+    }
+
+    try {
+      final updatedUser = await _ref.read(apiClientProvider).updatePreferences(
+            showInLeaderboard: showInLeaderboard,
+          );
+      state = AsyncData(
+        UserSession(
+          accessToken: currentSession.accessToken,
+          user: updatedUser,
+        ),
+      );
+    } catch (error) {
+      state = AsyncData(currentSession);
+      throw Exception(_readableAuthError(error));
+    }
   }
 
   String _readableAuthError(Object error) {
@@ -142,6 +175,7 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
   }
 }
 
-final authControllerProvider = StateNotifierProvider<AuthController, AsyncValue<UserSession?>>(
+final authControllerProvider =
+    StateNotifierProvider<AuthController, AsyncValue<UserSession?>>(
   AuthController.new,
 );

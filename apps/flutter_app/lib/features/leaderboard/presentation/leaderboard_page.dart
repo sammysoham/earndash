@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/constants/app_constants.dart';
 import '../../../core/models/gamification_models.dart';
+import '../../auth/logic/auth_controller.dart';
 import '../../gamification/presentation/gamification_page.dart';
 
 class LeaderboardPage extends ConsumerWidget {
@@ -48,6 +50,10 @@ class LeaderboardPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final leaderboard = ref.watch(leaderboardProvider);
+    final session = ref.watch(authControllerProvider).value;
+    final leaderboardPrivacyLabel = session?.user.showInLeaderboard == true
+        ? 'You are showing your display name on leaderboards.'
+        : 'You are currently shown anonymously on leaderboards.';
 
     return Scaffold(
       appBar: AppBar(title: const Text('Leaderboard')),
@@ -93,6 +99,46 @@ class LeaderboardPage extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: 24),
+              Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF102218),
+                  borderRadius: BorderRadius.circular(22),
+                  border: Border.all(color: const Color(0x221FF5C6)),
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Leaderboard privacy',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            leaderboardPrivacyLabel,
+                            style: const TextStyle(
+                              color: Color(0xFF9CB1AA),
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    FilledButton.tonal(
+                      onPressed: () => context.go('/account'),
+                      child: const Text('Manage'),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 16),
               _LeaderboardPanel(entries: merged),
             ],
           );

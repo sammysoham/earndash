@@ -36,6 +36,7 @@ class DashboardShell extends ConsumerStatefulWidget {
       icon: Icons.leaderboard_outlined,
       path: '/leaderboard'
     ),
+    (label: 'Account', icon: Icons.manage_accounts_outlined, path: '/account'),
     (label: 'Levels', icon: Icons.emoji_events_outlined, path: '/gamification'),
     (label: 'Admin', icon: Icons.admin_panel_settings_outlined, path: '/admin'),
   ];

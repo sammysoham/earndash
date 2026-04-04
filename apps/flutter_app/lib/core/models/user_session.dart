@@ -5,6 +5,7 @@ class SessionUser {
     required this.displayName,
     required this.role,
     required this.referralCode,
+    required this.showInLeaderboard,
     this.countryCode,
     this.fraudScore = 0,
   });
@@ -14,6 +15,7 @@ class SessionUser {
   final String displayName;
   final String role;
   final String referralCode;
+  final bool showInLeaderboard;
   final String? countryCode;
   final int fraudScore;
 
@@ -26,6 +28,7 @@ class SessionUser {
       displayName: json['displayName'] as String,
       role: json['role'] as String,
       referralCode: json['referralCode'] as String? ?? '',
+      showInLeaderboard: json['showInLeaderboard'] as bool? ?? false,
       countryCode: json['countryCode'] as String?,
       fraudScore: json['fraudScore'] as int? ?? 0,
     );

@@ -87,6 +87,7 @@ class ApiClient {
     required String displayName,
     required String deviceFingerprint,
     String? referralCode,
+    bool acceptedTerms = true,
   }) async {
     if (AppConstants.useMockApi) {
       final session = await _mockBackend.signup(
@@ -109,6 +110,7 @@ class ApiClient {
         'deviceFingerprint': deviceFingerprint,
         'deviceType': 'flutter',
         'referralCode': referralCode,
+        'acceptedTerms': acceptedTerms,
       },
     );
     final session = UserSession.fromJson(response.data!);
@@ -122,6 +124,7 @@ class ApiClient {
     required String deviceFingerprint,
     required String googleId,
     String? idToken,
+    bool acceptedTerms = true,
   }) async {
     if (AppConstants.useMockApi) {
       final session = await _mockBackend.loginWithGoogle(
@@ -142,6 +145,7 @@ class ApiClient {
         'googleId': googleId,
         'deviceFingerprint': deviceFingerprint,
         'deviceType': 'flutter',
+        'acceptedTerms': acceptedTerms,
       },
     );
     final session = UserSession.fromJson(response.data!);
@@ -227,6 +231,25 @@ class ApiClient {
         .map((item) =>
             WithdrawalRequestModel.fromJson(item as Map<String, dynamic>))
         .toList();
+  }
+
+  Future<SessionUser> updatePreferences({
+    required bool showInLeaderboard,
+  }) async {
+    if (AppConstants.useMockApi) {
+      return _mockBackend.updatePreferences(
+        userId: _requireUserId(),
+        showInLeaderboard: showInLeaderboard,
+      );
+    }
+
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/auth/preferences',
+      data: {
+        'showInLeaderboard': showInLeaderboard,
+      },
+    );
+    return SessionUser.fromJson(response.data!['user'] as Map<String, dynamic>);
   }
 
   Future<GamificationProfile> getGamificationProfile() async {

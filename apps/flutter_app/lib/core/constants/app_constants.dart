@@ -4,7 +4,7 @@ class AppConstants {
   static const String appNickname = 'EarnDash';
   static const String apiBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.101:3000/api',
+    defaultValue: 'https://earndash-api.onrender.com/api',
   );
   static const int coinsPerDollar = 1000;
   static const int minWithdrawalCoins = 5000;

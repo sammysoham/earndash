@@ -6,16 +6,42 @@ import '../../../core/constants/app_constants.dart';
 import '../../../core/network/api_client.dart';
 import '../../auth/logic/auth_controller.dart';
 
+final rewardedAdCooldownProvider = StateProvider<DateTime?>((ref) => null);
+final rewardedAdClockProvider = StreamProvider<DateTime>((ref) async* {
+  yield DateTime.now();
+  while (true) {
+    await Future<void>.delayed(const Duration(seconds: 1));
+    yield DateTime.now();
+  }
+});
+
 final rewardedAdServiceProvider = Provider<RewardedAdService>(
-  (ref) => RewardedAdService(ref.read(apiClientProvider)),
+  (ref) => RewardedAdService(ref),
 );
 
 class RewardedAdService {
-  RewardedAdService(this._apiClient);
+  RewardedAdService(this._ref) : _apiClient = _ref.read(apiClientProvider);
 
+  final Ref _ref;
   final ApiClient _apiClient;
 
+  int secondsUntilNextAd() {
+    final endsAt = _ref.read(rewardedAdCooldownProvider);
+    if (endsAt == null) {
+      return 0;
+    }
+
+    final remaining = endsAt.difference(DateTime.now()).inSeconds;
+    return remaining > 0 ? remaining : 0;
+  }
+
   Future<int> showRewardedAd() async {
+    final cooldown = secondsUntilNextAd();
+    if (cooldown > 0) {
+      throw Exception(
+          'Please wait ${cooldown}s before watching another rewarded ad.');
+    }
+
     if (kIsWeb ||
         (defaultTargetPlatform != TargetPlatform.android &&
             defaultTargetPlatform != TargetPlatform.iOS) ||
@@ -90,6 +116,9 @@ class RewardedAdService {
 
     final reward = await completer.future.timeout(const Duration(seconds: 45));
     rewardedAd?.dispose();
+    _ref.read(rewardedAdCooldownProvider.notifier).state = DateTime.now().add(
+      const Duration(seconds: 30),
+    );
     return reward;
   }
 

@@ -136,7 +136,9 @@ export class GamificationService {
 
     return rows.map((user) => ({
       userId: user.id,
-      displayName: user.displayName,
+      displayName: user.showInLeaderboard
+        ? user.displayName
+        : `Anonymous ${user.id.replace(/-/g, '').slice(-4).toUpperCase()}`,
       level: user.level,
       xp: user.xp,
       lifetimeEarned: user.wallet?.lifetimeEarned ?? 0,

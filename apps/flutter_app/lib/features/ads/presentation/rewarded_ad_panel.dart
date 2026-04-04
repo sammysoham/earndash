@@ -49,6 +49,11 @@ class RewardedAdPanel extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(rewardedAdClockProvider);
+    final cooldownEndsAt = ref.watch(rewardedAdCooldownProvider);
+    final secondsRemaining = _secondsRemaining(cooldownEndsAt);
+    final isCoolingDown = secondsRemaining > 0;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 640;
@@ -70,44 +75,76 @@ class RewardedAdPanel extends ConsumerWidget {
                     const Text(
                       'Watch rewarded videos to earn coins that move into pending rewards before becoming withdrawable.',
                     ),
+                    const SizedBox(height: 8),
+                    Text(
+                      isCoolingDown
+                          ? 'Next rewarded ad unlocks in ${secondsRemaining}s.'
+                          : 'One rewarded video becomes available every 30 seconds.',
+                      style: const TextStyle(
+                        color: Color(0xFF9CB1AA),
+                        height: 1.5,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     FilledButton.icon(
-                      onPressed: () => runRewardFlow(
-                        context,
-                        ref,
-                        action: (service) => service.showRewardedAd(),
-                        successLabel: 'You earned',
-                      ),
+                      onPressed: isCoolingDown
+                          ? null
+                          : () => runRewardFlow(
+                                context,
+                                ref,
+                                action: (service) => service.showRewardedAd(),
+                                successLabel: 'You earned',
+                              ),
                       icon: const Icon(Icons.ondemand_video_rounded),
-                      label: const Text('Watch video'),
+                      label: Text(
+                        isCoolingDown
+                            ? 'Available in ${secondsRemaining}s'
+                            : 'Watch video',
+                      ),
                     ),
                   ],
                 )
               : Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Rewarded ads',
+                          const Text('Rewarded ads',
                               style: TextStyle(
                                   fontSize: 22, fontWeight: FontWeight.w700)),
-                          SizedBox(height: 8),
-                          Text(
+                          const SizedBox(height: 8),
+                          const Text(
                             'Watch rewarded videos to earn coins that move into pending rewards before becoming withdrawable.',
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            isCoolingDown
+                                ? 'Next rewarded ad unlocks in ${secondsRemaining}s.'
+                                : 'One rewarded video becomes available every 30 seconds.',
+                            style: const TextStyle(
+                              color: Color(0xFF9CB1AA),
+                              height: 1.5,
+                            ),
                           ),
                         ],
                       ),
                     ),
                     FilledButton.icon(
-                      onPressed: () => runRewardFlow(
-                        context,
-                        ref,
-                        action: (service) => service.showRewardedAd(),
-                        successLabel: 'You earned',
-                      ),
+                      onPressed: isCoolingDown
+                          ? null
+                          : () => runRewardFlow(
+                                context,
+                                ref,
+                                action: (service) => service.showRewardedAd(),
+                                successLabel: 'You earned',
+                              ),
                       icon: const Icon(Icons.ondemand_video_rounded),
-                      label: const Text('Watch video'),
+                      label: Text(
+                        isCoolingDown
+                            ? 'Available in ${secondsRemaining}s'
+                            : 'Watch video',
+                      ),
                     ),
                   ],
                 ),
@@ -131,6 +168,11 @@ class CompactRewardedAdCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(rewardedAdClockProvider);
+    final cooldownEndsAt = ref.watch(rewardedAdCooldownProvider);
+    final secondsRemaining = _secondsRemaining(cooldownEndsAt);
+    final isCoolingDown = secondsRemaining > 0;
+
     return Container(
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
@@ -162,19 +204,41 @@ class CompactRewardedAdCard extends ConsumerWidget {
           const SizedBox(height: 10),
           Text(body,
               style: const TextStyle(color: Color(0xFF9CB1AA), height: 1.5)),
+          const SizedBox(height: 8),
+          Text(
+            isCoolingDown
+                ? 'Next rewarded ad unlocks in ${secondsRemaining}s.'
+                : 'A short cooldown keeps video rewards fair and sustainable.',
+            style: const TextStyle(color: Color(0xFF7FA496), height: 1.5),
+          ),
           const SizedBox(height: 18),
           FilledButton.icon(
-            onPressed: () => runRewardFlow(
-              context,
-              ref,
-              action: (service) => service.showRewardedAd(),
-              successLabel: 'You earned',
-            ),
+            onPressed: isCoolingDown
+                ? null
+                : () => runRewardFlow(
+                      context,
+                      ref,
+                      action: (service) => service.showRewardedAd(),
+                      successLabel: 'You earned',
+                    ),
             icon: const Icon(Icons.play_circle_fill_rounded),
-            label: const Text('Watch video'),
+            label: Text(
+              isCoolingDown
+                  ? 'Available in ${secondsRemaining}s'
+                  : 'Watch video',
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+int _secondsRemaining(DateTime? cooldownEndsAt) {
+  if (cooldownEndsAt == null) {
+    return 0;
+  }
+
+  final remaining = cooldownEndsAt.difference(DateTime.now()).inSeconds;
+  return remaining > 0 ? remaining : 0;
 }

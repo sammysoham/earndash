@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { MoreThan, Repository } from 'typeorm';
 import { ConfirmAdRewardDto } from './dto/confirm-ad-reward.dto';
 import { AdReward } from './entities/ad-reward.entity';
 import { WalletService } from '../wallet/wallet.service';
@@ -22,6 +22,22 @@ export class AdsService {
   async confirmReward(userId: string, dto: ConfirmAdRewardDto) {
     if (dto.coins < 5 || dto.coins > 20) {
       throw new BadRequestException('Ad reward amount is outside the allowed range');
+    }
+
+    const cooldownBoundary = new Date(Date.now() - 30_000);
+    const recentReward = await this.adRewardsRepository.findOne({
+      where: {
+        userId,
+        createdAt: MoreThan(cooldownBoundary),
+      },
+      order: { createdAt: 'DESC' },
+    });
+    if (recentReward) {
+      const waitSeconds = Math.max(
+        1,
+        Math.ceil((recentReward.createdAt.getTime() + 30_000 - Date.now()) / 1000),
+      );
+      throw new BadRequestException(`Please wait ${waitSeconds}s before watching another rewarded ad`);
     }
 
     const existing = await this.adRewardsRepository.findOne({ where: { sessionId: dto.sessionId } });

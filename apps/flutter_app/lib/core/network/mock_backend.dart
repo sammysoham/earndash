@@ -130,6 +130,7 @@ class MockBackend {
     required String displayName,
     required String deviceFingerprint,
     String? referralCode,
+    bool acceptedTerms = true,
   }) {
     return _withLatency(() {
       final normalized = email.trim().toLowerCase();
@@ -204,6 +205,7 @@ class MockBackend {
     required String email,
     required String displayName,
     required String deviceFingerprint,
+    bool acceptedTerms = true,
   }) {
     return _withLatency(() {
       final normalized = email.trim().toLowerCase();
@@ -279,7 +281,9 @@ class MockBackend {
           .map(
             (user) => LeaderboardEntry(
               userId: user.id,
-              displayName: user.displayName,
+              displayName: user.showInLeaderboard
+                  ? user.displayName
+                  : 'Anonymous ${_anonymousSuffixForUser(user.id)}',
               level: user.level,
               xp: user.xp,
               lifetimeEarned: user.lifetimeEarned,
@@ -305,6 +309,12 @@ class MockBackend {
             : _usersById[user.referredByUserId!]?.displayName,
       );
     });
+  }
+
+  String _anonymousSuffixForUser(String userId) {
+    final compactId = userId.replaceAll('-', '');
+    final startIndex = compactId.length > 4 ? compactId.length - 4 : 0;
+    return compactId.substring(startIndex).toUpperCase();
   }
 
   Future<AdminMetrics> getAdminMetrics() {
@@ -765,6 +775,17 @@ class MockBackend {
     });
   }
 
+  Future<SessionUser> updatePreferences({
+    required String userId,
+    required bool showInLeaderboard,
+  }) {
+    return _withLatency(() {
+      final user = _usersById[userId]!;
+      user.showInLeaderboard = showInLeaderboard;
+      return _toSession(user, 'mock-token-${user.id}').user;
+    });
+  }
+
   _MockUser _createUser({
     required String email,
     required String displayName,
@@ -834,6 +855,7 @@ class MockBackend {
         displayName: user.displayName,
         role: user.role,
         referralCode: user.referralCode,
+        showInLeaderboard: user.showInLeaderboard,
         countryCode: user.countryCode,
         fraudScore: user.fraudScore,
       ),
@@ -1508,6 +1530,7 @@ class _MockUser {
   int commissionEarnedCoins;
   int abuseFlags;
   bool isBlocked = false;
+  bool showInLeaderboard = false;
   String? lastDeviceFingerprint;
   String? referredByUserId;
   DateTime createdAt;

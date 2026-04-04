@@ -63,7 +63,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           children: [
                             const Expanded(child: _MarketingPanel()),
                             const SizedBox(width: 32),
-                            Expanded(child: _AuthCard(
+                            Expanded(
+                                child: _AuthCard(
                               isSignup: _isSignup,
                               isLoading: isLoading,
                               emailController: _emailController,
@@ -72,24 +73,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               referralCodeController: _referralCodeController,
                               onPrimaryAction: () async {
                                 if (_isSignup) {
-                                  await ref.read(authControllerProvider.notifier).signup(
+                                  await ref
+                                      .read(authControllerProvider.notifier)
+                                      .signup(
                                         email: _emailController.text,
                                         password: _passwordController.text,
-                                        displayName: _displayNameController.text,
-                                        referralCode: _referralCodeController.text,
+                                        displayName:
+                                            _displayNameController.text,
+                                        referralCode:
+                                            _referralCodeController.text,
                                       );
                                 } else {
-                                  await ref.read(authControllerProvider.notifier).login(
+                                  await ref
+                                      .read(authControllerProvider.notifier)
+                                      .login(
                                         email: _emailController.text,
                                         password: _passwordController.text,
                                       );
                                 }
                               },
-                              onGoogleAction: () => ref.read(authControllerProvider.notifier).loginWithGoogle(),
-                              onAdminDemo: () => ref.read(authControllerProvider.notifier).loginAsDemo(admin: true),
-                              onUserDemo: () => ref.read(authControllerProvider.notifier).loginAsDemo(),
-                              onToggleMode: () => setState(() => _isSignup = !_isSignup),
-                              errorText: authState.whenOrNull(error: (error, _) => '$error'),
+                              onGoogleAction: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .loginWithGoogle(),
+                              onAdminDemo: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .loginAsDemo(admin: true),
+                              onUserDemo: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .loginAsDemo(),
+                              onToggleMode: () =>
+                                  setState(() => _isSignup = !_isSignup),
+                              errorText: authState.whenOrNull(
+                                  error: (error, _) => '$error'),
                             )),
                           ],
                         )
@@ -106,24 +121,38 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                               referralCodeController: _referralCodeController,
                               onPrimaryAction: () async {
                                 if (_isSignup) {
-                                  await ref.read(authControllerProvider.notifier).signup(
+                                  await ref
+                                      .read(authControllerProvider.notifier)
+                                      .signup(
                                         email: _emailController.text,
                                         password: _passwordController.text,
-                                        displayName: _displayNameController.text,
-                                        referralCode: _referralCodeController.text,
+                                        displayName:
+                                            _displayNameController.text,
+                                        referralCode:
+                                            _referralCodeController.text,
                                       );
                                 } else {
-                                  await ref.read(authControllerProvider.notifier).login(
+                                  await ref
+                                      .read(authControllerProvider.notifier)
+                                      .login(
                                         email: _emailController.text,
                                         password: _passwordController.text,
                                       );
                                 }
                               },
-                              onGoogleAction: () => ref.read(authControllerProvider.notifier).loginWithGoogle(),
-                              onAdminDemo: () => ref.read(authControllerProvider.notifier).loginAsDemo(admin: true),
-                              onUserDemo: () => ref.read(authControllerProvider.notifier).loginAsDemo(),
-                              onToggleMode: () => setState(() => _isSignup = !_isSignup),
-                              errorText: authState.whenOrNull(error: (error, _) => '$error'),
+                              onGoogleAction: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .loginWithGoogle(),
+                              onAdminDemo: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .loginAsDemo(admin: true),
+                              onUserDemo: () => ref
+                                  .read(authControllerProvider.notifier)
+                                  .loginAsDemo(),
+                              onToggleMode: () =>
+                                  setState(() => _isSignup = !_isSignup),
+                              errorText: authState.whenOrNull(
+                                  error: (error, _) => '$error'),
                             ),
                           ],
                         ),
@@ -160,7 +189,8 @@ class _MarketingPanel extends StatelessWidget {
           const SizedBox(height: 16),
           const Text(
             'Earn through daily movement, rewarded videos, referrals, and a wallet built to keep every coin easy to track.',
-            style: TextStyle(fontSize: 18, color: Color(0xFF9CB1AA), height: 1.5),
+            style:
+                TextStyle(fontSize: 18, color: Color(0xFF9CB1AA), height: 1.5),
           ),
           const SizedBox(height: 24),
           const Wrap(
@@ -174,21 +204,23 @@ class _MarketingPanel extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-            Text(
-              AppConstants.useMockApi ? 'Quick test accounts' : 'Real backend mode',
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
+          Text(
+            AppConstants.useMockApi
+                ? 'Quick test accounts'
+                : 'Real backend mode',
+            style: const TextStyle(fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 8),
           Text(
-              AppConstants.useMockApi
+            AppConstants.useMockApi
                 ? 'Admin: admin@earndash.dev / password123'
-                : 'Create your account to start earning and tracking your progress.',
-            ),
+                : 'Create your account to start earning, manage privacy, and track your rewards.',
+          ),
           const SizedBox(height: 4),
           Text(
             AppConstants.useMockApi
                 ? 'User: sara@earndash.dev / password123'
-                : 'Google sign-in is also available on supported devices.',
+                : 'Google sign-in is available on supported devices, and your leaderboard name can stay anonymous unless you opt in.',
           ),
         ],
       ),
@@ -277,7 +309,9 @@ class _AuthCard extends StatelessWidget {
               ),
               const SizedBox(height: 16),
             ],
-            TextField(controller: emailController, decoration: const InputDecoration(labelText: 'Email')),
+            TextField(
+                controller: emailController,
+                decoration: const InputDecoration(labelText: 'Email')),
             const SizedBox(height: 16),
             TextField(
               controller: passwordController,
@@ -304,6 +338,22 @@ class _AuthCard extends StatelessWidget {
               ),
               const SizedBox(height: 12),
             ],
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                const Text(
+                  'By creating an account or continuing with Google, you agree to the platform terms.',
+                  style: TextStyle(color: Color(0xFF8FAE99), height: 1.5),
+                ),
+                TextButton(
+                  onPressed: () => context.push('/terms'),
+                  child: const Text('Read Terms & Conditions'),
+                ),
+              ],
+            ),
             if (AppConstants.useMockApi) ...[
               Wrap(
                 spacing: 12,
@@ -323,7 +373,8 @@ class _AuthCard extends StatelessWidget {
             ],
             TextButton(
               onPressed: isLoading ? null : onToggleMode,
-              child: Text(isSignup ? 'Already have an account?' : 'Need an account?'),
+              child: Text(
+                  isSignup ? 'Already have an account?' : 'Need an account?'),
             ),
             if (isLoading) ...[
               const SizedBox(height: 12),
