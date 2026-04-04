@@ -42,6 +42,14 @@ export class WithdrawalsRepository {
     return this.repository.findOne({ where: { id: withdrawalId }, relations: { user: true } });
   }
 
+  findByUserId(userId: string): Promise<Withdrawal[]> {
+    return this.repository.find({
+      where: { userId },
+      order: { createdAt: 'DESC' },
+      take: 50,
+    });
+  }
+
   listRecent(): Promise<Withdrawal[]> {
     return this.repository.find({
       relations: { user: true },

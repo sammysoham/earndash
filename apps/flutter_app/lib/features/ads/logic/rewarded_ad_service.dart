@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -15,21 +14,17 @@ class RewardedAdService {
   RewardedAdService(this._apiClient);
 
   final ApiClient _apiClient;
-  final Random _random = Random();
 
   Future<int> showRewardedAd() async {
     if (kIsWeb ||
         (defaultTargetPlatform != TargetPlatform.android &&
             defaultTargetPlatform != TargetPlatform.iOS) ||
         AppConstants.rewardedAdUnitId.isEmpty) {
-      return _creditFallbackReward();
+      throw Exception(
+          'Rewarded ads are not available on this device right now.');
     }
 
-    try {
-      return await _showNativeRewardedAd();
-    } catch (_) {
-      return _creditFallbackReward();
-    }
+    return _showNativeRewardedAd();
   }
 
   Future<int> _showNativeRewardedAd() async {
@@ -47,13 +42,17 @@ class RewardedAdService {
             onAdDismissedFullScreenContent: (ad) {
               ad.dispose();
               if (!rewardGranted && !completer.isCompleted) {
-                completer.completeError(Exception('Ad closed before reward'));
+                completer.completeError(
+                    Exception('Ad closed before the reward finished.'));
               }
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
               ad.dispose();
               if (!completer.isCompleted) {
-                completer.completeError(error);
+                completer.completeError(
+                  Exception(
+                      'This ad could not be shown right now. Please try again shortly.'),
+                );
               }
             },
           );
@@ -76,7 +75,14 @@ class RewardedAdService {
         },
         onAdFailedToLoad: (error) {
           if (!completer.isCompleted) {
-            completer.completeError(error);
+            final message = switch (error.code) {
+              3 => 'No ad is available right now. Please try again in a bit.',
+              2 =>
+                'Network issue while loading the ad. Check your connection and try again.',
+              1 => 'Ad request was invalid. Please try again shortly.',
+              _ => 'Rewarded ad failed to load right now. Please try again.',
+            };
+            completer.completeError(Exception(message));
           }
         },
       ),
@@ -85,17 +91,6 @@ class RewardedAdService {
     final reward = await completer.future.timeout(const Duration(seconds: 45));
     rewardedAd?.dispose();
     return reward;
-  }
-
-  Future<int> _creditFallbackReward({
-    int minCoins = 5,
-    int maxCoins = 20,
-  }) async {
-    final reward = minCoins + _random.nextInt(maxCoins - minCoins + 1);
-    return _creditReward(
-      adUnitId: AppConstants.rewardedAdUnitId,
-      coins: reward,
-    );
   }
 
   Future<int> _creditReward({

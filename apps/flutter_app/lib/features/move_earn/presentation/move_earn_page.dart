@@ -56,7 +56,8 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
         data: (data) => LayoutBuilder(
           builder: (context, constraints) {
             final isCompact = constraints.maxWidth < 920;
-            final wideCardWidth = isCompact ? double.infinity : (constraints.maxWidth - 16) / 2;
+            final wideCardWidth =
+                isCompact ? double.infinity : (constraints.maxWidth - 16) / 2;
 
             return ListView(
               children: [
@@ -74,28 +75,36 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                   runSpacing: 16,
                   children: [
                     _FitnessStatCard(
-                      width: isCompact ? (constraints.maxWidth - 16) / 2 : (constraints.maxWidth - 48) / 4,
+                      width: isCompact
+                          ? (constraints.maxWidth - 16) / 2
+                          : (constraints.maxWidth - 48) / 4,
                       label: 'Today\'s steps',
                       value: '${data.todaySteps}',
                       accent: const Color(0xFF00E676),
                       icon: Icons.directions_walk_rounded,
                     ),
                     _FitnessStatCard(
-                      width: isCompact ? (constraints.maxWidth - 16) / 2 : (constraints.maxWidth - 48) / 4,
+                      width: isCompact
+                          ? (constraints.maxWidth - 16) / 2
+                          : (constraints.maxWidth - 48) / 4,
                       label: 'Distance',
                       value: '${data.distanceKm.toStringAsFixed(2)} km',
                       accent: const Color(0xFF79FFAE),
                       icon: Icons.route_rounded,
                     ),
                     _FitnessStatCard(
-                      width: isCompact ? (constraints.maxWidth - 16) / 2 : (constraints.maxWidth - 48) / 4,
+                      width: isCompact
+                          ? (constraints.maxWidth - 16) / 2
+                          : (constraints.maxWidth - 48) / 4,
                       label: 'Active minutes',
                       value: '${data.activeMinutes} min',
                       accent: const Color(0xFFB5FF73),
                       icon: Icons.local_fire_department_outlined,
                     ),
                     _FitnessStatCard(
-                      width: isCompact ? (constraints.maxWidth - 16) / 2 : (constraints.maxWidth - 48) / 4,
+                      width: isCompact
+                          ? (constraints.maxWidth - 16) / 2
+                          : (constraints.maxWidth - 48) / 4,
                       label: 'Calories',
                       value: '${data.calories}',
                       accent: const Color(0xFFE7FF9A),
@@ -106,7 +115,8 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                 const SizedBox(height: 24),
                 const CompactRewardedAdCard(
                   title: 'Need a coin boost while you move?',
-                  body: 'Use a rewarded video to activate a short 2x step multiplier while your verified movement rewards keep building.',
+                  body:
+                      'Use a rewarded video to activate a short 2x step multiplier while your verified movement rewards keep building.',
                   highlight: 'Move booster',
                 ),
                 const SizedBox(height: 24),
@@ -120,12 +130,15 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                       width: wideCardWidth,
                       child: _WeeklyChartCard(
                         title: 'Weekly steps',
-                        subtitle: '${data.weeklySteps} / ${data.weeklyGoalSteps} steps this week',
-                        metricLabelBuilder: (item) => '${(item.steps / 1000).toStringAsFixed(1)}k',
+                        subtitle:
+                            '${data.weeklySteps} / ${data.weeklyGoalSteps} steps this week',
+                        metricLabelBuilder: (item) =>
+                            '${(item.steps / 1000).toStringAsFixed(1)}k',
                         valueBuilder: (item) => item.steps.toDouble(),
-                        colorBuilder: (item) => item.steps >= data.dailyGoalSteps
-                            ? const Color(0xFF00E676)
-                            : const Color(0xFF1F6F48),
+                        colorBuilder: (item) =>
+                            item.steps >= data.dailyGoalSteps
+                                ? const Color(0xFF00E676)
+                                : const Color(0xFF1F6F48),
                         items: data.weeklyChart,
                       ),
                     ),
@@ -133,8 +146,10 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                       width: wideCardWidth,
                       child: _WeeklyChartCard(
                         title: 'Distance chart',
-                        subtitle: '${data.weeklyChart.fold<double>(0, (sum, item) => sum + item.distanceKm).toStringAsFixed(1)} km moved this week',
-                        metricLabelBuilder: (item) => item.distanceKm.toStringAsFixed(1),
+                        subtitle:
+                            '${data.weeklyChart.fold<double>(0, (sum, item) => sum + item.distanceKm).toStringAsFixed(1)} km moved this week',
+                        metricLabelBuilder: (item) =>
+                            item.distanceKm.toStringAsFixed(1),
                         valueBuilder: (item) => item.distanceKm,
                         colorBuilder: (item) => item.distanceKm >= 4
                             ? const Color(0xFF7CFFB2)
@@ -162,7 +177,8 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                 const SizedBox(height: 24),
                 const _SectionTitle(
                   title: 'Weekly challenges',
-                  subtitle: 'Complete movement goals to stack safe bonus coins and streak momentum.',
+                  subtitle:
+                      'Complete movement goals to stack safe bonus coins and streak momentum.',
                 ),
                 const SizedBox(height: 12),
                 Wrap(
@@ -171,7 +187,9 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                   children: [
                     for (final challenge in data.weeklyChallenges)
                       SizedBox(
-                        width: isCompact ? double.infinity : (constraints.maxWidth - 32) / 3,
+                        width: isCompact
+                            ? double.infinity
+                            : (constraints.maxWidth - 32) / 3,
                         child: _ChallengeCard(challenge: challenge),
                       ),
                   ],
@@ -205,7 +223,8 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
     setState(() => _syncing = true);
     try {
       final updated = await ref.read(apiClientProvider).syncMoveActivity();
-      final earned = max(0, updated.rewardedCoinsToday - current.rewardedCoinsToday);
+      final earned =
+          max(0, updated.rewardedCoinsToday - current.rewardedCoinsToday);
       ref.invalidate(moveEarnProvider);
       ref.invalidate(walletProvider);
       ref.invalidate(gamificationProfileProvider);
@@ -253,7 +272,8 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
   Future<void> _activateBoost() async {
     setState(() => _boosting = true);
     try {
-      final adReward = await ref.read(rewardedAdServiceProvider).showRewardedAd();
+      final adReward =
+          await ref.read(rewardedAdServiceProvider).showRewardedAd();
       await ref.read(apiClientProvider).activateStepBoost();
       ref.invalidate(moveEarnProvider);
       ref.invalidate(walletProvider);
@@ -271,8 +291,16 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('2x step boost is live for 30 seconds. Video reward: +$adReward pending coins'),
+            content: Text(
+                '2x step boost is live for 30 seconds. Video reward: +$adReward pending coins'),
           ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(error.toString().replaceFirst('Exception: ', ''))),
         );
       }
     } finally {
@@ -316,8 +344,10 @@ class _MoveHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (data.todaySteps / data.dailyGoalSteps).clamp(0, 1).toDouble();
-    final weeklyProgress = (data.weeklySteps / data.weeklyGoalSteps).clamp(0, 1).toDouble();
+    final progress =
+        (data.todaySteps / data.dailyGoalSteps).clamp(0, 1).toDouble();
+    final weeklyProgress =
+        (data.weeklySteps / data.weeklyGoalSteps).clamp(0, 1).toDouble();
 
     return Container(
       padding: EdgeInsets.all(isCompact ? 24 : 30),
@@ -343,10 +373,17 @@ class _MoveHero extends StatelessWidget {
             spacing: 12,
             runSpacing: 12,
             children: [
-              const _HeroBadge(label: 'Fitness live', icon: Icons.favorite_rounded),
-              _HeroBadge(label: '${data.rank} rank', icon: Icons.workspace_premium_rounded),
-              _HeroBadge(label: '${(data.rankMultiplier).toStringAsFixed(1)}x base', icon: Icons.auto_graph_rounded),
-              _HeroBadge(label: 'Daily cap ${data.rankDailyCap}', icon: Icons.verified_user_outlined),
+              const _HeroBadge(
+                  label: 'Fitness live', icon: Icons.favorite_rounded),
+              _HeroBadge(
+                  label: '${data.rank} rank',
+                  icon: Icons.workspace_premium_rounded),
+              _HeroBadge(
+                  label: '${(data.rankMultiplier).toStringAsFixed(1)}x base',
+                  icon: Icons.auto_graph_rounded),
+              _HeroBadge(
+                  label: 'Daily cap ${data.rankDailyCap}',
+                  icon: Icons.verified_user_outlined),
             ],
           ),
           const SizedBox(height: 18),
@@ -369,7 +406,10 @@ class _MoveHero extends StatelessWidget {
             runSpacing: 24,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              _ProgressRing(progress: progress, steps: data.todaySteps, goal: data.dailyGoalSteps),
+              _ProgressRing(
+                  progress: progress,
+                  steps: data.todaySteps,
+                  goal: data.dailyGoalSteps),
               SizedBox(
                 width: isCompact ? double.infinity : 460,
                 child: Column(
@@ -377,7 +417,8 @@ class _MoveHero extends StatelessWidget {
                   children: [
                     Text(
                       '${data.rewardedCoinsToday} coins earned from activity today',
-                      style: const TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
+                      style: const TextStyle(
+                          fontSize: 28, fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -391,7 +432,8 @@ class _MoveHero extends StatelessWidget {
                         minHeight: 12,
                         value: weeklyProgress,
                         backgroundColor: const Color(0x1EFFFFFF),
-                        valueColor: const AlwaysStoppedAnimation(Color(0xFF00E676)),
+                        valueColor:
+                            const AlwaysStoppedAnimation(Color(0xFF00E676)),
                       ),
                     ),
                     const SizedBox(height: 10),
@@ -418,7 +460,9 @@ class _MoveHero extends StatelessWidget {
                           onPressed: onBoost,
                           icon: const Icon(Icons.ondemand_video_rounded),
                           label: Text(
-                            data.stepBoostActive ? 'Boost running' : 'Watch ad for boost',
+                            data.stepBoostActive
+                                ? 'Boost running'
+                                : 'Watch ad for boost',
                           ),
                         ),
                       ],
@@ -529,10 +573,12 @@ class _ProgressRing extends StatelessWidget {
             children: [
               Text(
                 '$steps',
-                style: const TextStyle(fontSize: 34, fontWeight: FontWeight.w800),
+                style:
+                    const TextStyle(fontSize: 34, fontWeight: FontWeight.w800),
               ),
               const SizedBox(height: 4),
-              const Text('steps today', style: TextStyle(color: Color(0xFF9FD5AF))),
+              const Text('steps today',
+                  style: TextStyle(color: Color(0xFF9FD5AF))),
               const SizedBox(height: 8),
               Text(
                 '$goal goal',
@@ -560,7 +606,8 @@ class _SectionTitle extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
+        Text(title,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
         const SizedBox(height: 6),
         Text(subtitle, style: const TextStyle(color: Color(0xFF90B69E))),
       ],
@@ -610,7 +657,8 @@ class _FitnessStatCard extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value,
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, color: accent),
+            style: TextStyle(
+                fontSize: 24, fontWeight: FontWeight.w800, color: accent),
           ),
         ],
       ),
@@ -637,7 +685,8 @@ class _WeeklyChartCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final maxValue = items.fold<double>(1, (current, item) => max(current, valueBuilder(item)));
+    final maxValue = items.fold<double>(
+        1, (current, item) => max(current, valueBuilder(item)));
 
     return Container(
       padding: const EdgeInsets.all(22),
@@ -648,7 +697,9 @@ class _WeeklyChartCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           const SizedBox(height: 6),
           Text(subtitle, style: const TextStyle(color: Color(0xFF90B69E))),
           const SizedBox(height: 20),
@@ -664,11 +715,13 @@ class _WeeklyChartCard extends StatelessWidget {
                       children: [
                         Text(
                           metricLabelBuilder(item),
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF90B69E)),
+                          style: const TextStyle(
+                              fontSize: 12, color: Color(0xFF90B69E)),
                         ),
                         const SizedBox(height: 8),
                         TweenAnimationBuilder<double>(
-                          tween: Tween<double>(begin: 0, end: valueBuilder(item) / maxValue),
+                          tween: Tween<double>(
+                              begin: 0, end: valueBuilder(item) / maxValue),
                           duration: const Duration(milliseconds: 900),
                           builder: (context, value, _) => Container(
                             height: 124 * value + 12,
@@ -679,7 +732,8 @@ class _WeeklyChartCard extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        Text(item.label, style: const TextStyle(color: Color(0xFF90B69E))),
+                        Text(item.label,
+                            style: const TextStyle(color: Color(0xFF90B69E))),
                       ],
                     ),
                   ),
@@ -699,7 +753,8 @@ class _GoalPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final goalProgress = (data.todaySteps / data.dailyGoalSteps).clamp(0, 1).toDouble();
+    final goalProgress =
+        (data.todaySteps / data.dailyGoalSteps).clamp(0, 1).toDouble();
     final streakMilestones = <({int day, int reward})>[
       (day: 3, reward: 30),
       (day: 7, reward: 90),
@@ -715,7 +770,8 @@ class _GoalPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Daily goal & streak', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          const Text('Daily goal & streak',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           Text(
             '${data.todaySteps}/${data.dailyGoalSteps} steps today • ${data.goalStreakDays}-day streak',
@@ -786,7 +842,8 @@ class _ChallengeCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (challenge.progress / challenge.target).clamp(0, 1).toDouble();
+    final progress =
+        (challenge.progress / challenge.target).clamp(0, 1).toDouble();
 
     return Container(
       padding: const EdgeInsets.all(18),
@@ -802,7 +859,8 @@ class _ChallengeCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   challenge.title,
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800),
+                  style: const TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w800),
                 ),
               ),
               if (challenge.completed)
@@ -822,14 +880,17 @@ class _ChallengeCard extends StatelessWidget {
               value: progress,
               backgroundColor: const Color(0x221CFF87),
               valueColor: AlwaysStoppedAnimation(
-                challenge.completed ? const Color(0xFFB5FF73) : const Color(0xFF00E676),
+                challenge.completed
+                    ? const Color(0xFFB5FF73)
+                    : const Color(0xFF00E676),
               ),
             ),
           ),
           const SizedBox(height: 14),
           Text(
             '${challenge.rewardCoins} bonus coins',
-            style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFFB5FF73)),
+            style: const TextStyle(
+                fontWeight: FontWeight.w800, color: Color(0xFFB5FF73)),
           ),
         ],
       ),
@@ -855,7 +916,8 @@ class _RankCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Fitness rank', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          const Text('Fitness rank',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           const Text(
             'Higher activity unlocks bigger step caps, better multipliers, and stronger event access.',
@@ -868,19 +930,26 @@ class _RankCard extends StatelessWidget {
             children: [
               for (final rank in ranks)
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                   decoration: BoxDecoration(
-                    color: rank == data.rank ? const Color(0x1A00E676) : const Color(0x101C3024),
+                    color: rank == data.rank
+                        ? const Color(0x1A00E676)
+                        : const Color(0x101C3024),
                     borderRadius: BorderRadius.circular(999),
                     border: Border.all(
-                      color: rank == data.rank ? const Color(0x4400E676) : const Color(0x14FFFFFF),
+                      color: rank == data.rank
+                          ? const Color(0x4400E676)
+                          : const Color(0x14FFFFFF),
                     ),
                   ),
                   child: Text(
                     rank,
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
-                      color: rank == data.rank ? const Color(0xFF00E676) : Colors.white,
+                      color: rank == data.rank
+                          ? const Color(0xFF00E676)
+                          : Colors.white,
                     ),
                   ),
                 ),
@@ -891,10 +960,16 @@ class _RankCard extends StatelessWidget {
             spacing: 20,
             runSpacing: 20,
             children: [
-              _RankMeta(label: 'Daily cap', value: '${data.rankDailyCap} steps'),
-              _RankMeta(label: 'Multiplier', value: '${data.rankMultiplier.toStringAsFixed(1)}x'),
-              _RankMeta(label: 'Boost', value: data.stepBoostActive ? '30s live' : 'Ready'),
-              _RankMeta(label: 'Goal streak', value: '${data.goalStreakDays} days'),
+              _RankMeta(
+                  label: 'Daily cap', value: '${data.rankDailyCap} steps'),
+              _RankMeta(
+                  label: 'Multiplier',
+                  value: '${data.rankMultiplier.toStringAsFixed(1)}x'),
+              _RankMeta(
+                  label: 'Boost',
+                  value: data.stepBoostActive ? '30s live' : 'Ready'),
+              _RankMeta(
+                  label: 'Goal streak', value: '${data.goalStreakDays} days'),
             ],
           ),
         ],
@@ -916,7 +991,8 @@ class _RankMeta extends StatelessWidget {
       children: [
         Text(label, style: const TextStyle(color: Color(0xFF90B69E))),
         const SizedBox(height: 6),
-        Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+        Text(value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
       ],
     );
   }
@@ -938,13 +1014,16 @@ class _LeaderBoardCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Step leaderboard', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          const Text('Step leaderboard',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
-          const Text('Top walkers and runners this week.', style: TextStyle(color: Color(0xFF90B69E))),
+          const Text('Top walkers and runners this week.',
+              style: TextStyle(color: Color(0xFF90B69E))),
           const SizedBox(height: 16),
           for (final entry in data.leaderboard.asMap().entries)
             Padding(
-              padding: EdgeInsets.only(bottom: entry.key == data.leaderboard.length - 1 ? 0 : 10),
+              padding: EdgeInsets.only(
+                  bottom: entry.key == data.leaderboard.length - 1 ? 0 : 10),
               child: _LeaderboardTile(rank: entry.key + 1, item: entry.value),
             ),
         ],
@@ -979,7 +1058,8 @@ class _LeaderboardTile extends StatelessWidget {
             child: Center(
               child: Text(
                 '$rank',
-                style: const TextStyle(fontWeight: FontWeight.w800, color: Color(0xFF00E676)),
+                style: const TextStyle(
+                    fontWeight: FontWeight.w800, color: Color(0xFF00E676)),
               ),
             ),
           ),
@@ -988,7 +1068,8 @@ class _LeaderboardTile extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(item.displayName, style: const TextStyle(fontWeight: FontWeight.w800)),
+                Text(item.displayName,
+                    style: const TextStyle(fontWeight: FontWeight.w800)),
                 const SizedBox(height: 4),
                 Text(
                   '${item.steps} steps • ${item.distanceKm.toStringAsFixed(1)} km',
@@ -999,7 +1080,8 @@ class _LeaderboardTile extends StatelessWidget {
           ),
           Text(
             item.rank,
-            style: const TextStyle(color: Color(0xFFB5FF73), fontWeight: FontWeight.w800),
+            style: const TextStyle(
+                color: Color(0xFFB5FF73), fontWeight: FontWeight.w800),
           ),
         ],
       ),
@@ -1023,7 +1105,8 @@ class _AntiCheatPanel extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Anti-cheat guardrails', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
+          const Text('Anti-cheat guardrails',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           const Text(
             'Move & Earn applies step verification, safe speed limits, boost windows, and daily caps before coins are granted.',

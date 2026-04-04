@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "889132772936-6ftvilqjn8p97n4rmgl2itqmacq1lmfj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.velorastudios.earndash",
+            "certificate_hash": "a7b68cd28d5ea6351cf87fd98b8cdb77428a3790"
+          }
+        },
+        {
           "client_id": "889132772936-bcfo6pee8omn1dju6gqaeot4d4hbncnd.apps.googleusercontent.com",
           "client_type": 3
         }

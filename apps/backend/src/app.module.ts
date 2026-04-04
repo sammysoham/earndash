@@ -20,6 +20,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuditModule } from './modules/audit/audit.module';
 import { FitnessModule } from './modules/fitness/fitness.module';
+import { MiniGamesModule } from './modules/mini-games/mini-games.module';
 
 @Module({
   imports: [
@@ -64,6 +65,7 @@ import { FitnessModule } from './modules/fitness/fitness.module';
     AdsModule,
     RewardsModule,
     FitnessModule,
+    MiniGamesModule,
     WithdrawalsModule,
     AnalyticsModule,
     AdminModule,

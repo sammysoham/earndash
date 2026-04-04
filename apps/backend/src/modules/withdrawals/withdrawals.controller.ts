@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
@@ -15,5 +15,10 @@ export class WithdrawalsController {
   @Post()
   requestWithdrawal(@CurrentUser() user: { id: string }, @Body() dto: WithdrawRequestDto) {
     return this.withdrawalsService.requestWithdrawal(user.id, dto);
+  }
+
+  @Get()
+  recent(@CurrentUser() user: { id: string }) {
+    return this.withdrawalsService.userRecent(user.id);
   }
 }

@@ -7,6 +7,8 @@ import '../features/auth/presentation/login_page.dart';
 import '../features/dashboard/presentation/dashboard_shell.dart';
 import '../features/dashboard/presentation/home_overview_page.dart';
 import '../features/gamification/presentation/gamification_page.dart';
+import '../features/leaderboard/presentation/leaderboard_page.dart';
+import '../features/mini_games/presentation/mini_games_page.dart';
 import '../features/move_earn/presentation/move_earn_page.dart';
 import '../features/offerwall/presentation/offerwall_page.dart';
 import '../features/referrals/presentation/referrals_page.dart';
@@ -34,14 +36,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ShellRoute(
         builder: (context, state, child) => DashboardShell(child: child),
         routes: [
-          GoRoute(path: '/dashboard', builder: (_, __) => const HomeOverviewPage()),
+          GoRoute(
+              path: '/dashboard', builder: (_, __) => const HomeOverviewPage()),
           GoRoute(path: '/move', builder: (_, __) => const MoveEarnPage()),
+          GoRoute(
+              path: '/mini-games', builder: (_, __) => const MiniGamesPage()),
           GoRoute(path: '/ads', builder: (_, __) => const AdsPage()),
-          GoRoute(path: '/offerwall', builder: (_, __) => const OfferwallPage()),
+          GoRoute(
+              path: '/offerwall', builder: (_, __) => const OfferwallPage()),
           GoRoute(path: '/wallet', builder: (_, __) => const WalletPage()),
-          GoRoute(path: '/withdrawals', builder: (_, __) => const WithdrawalsPage()),
-          GoRoute(path: '/referrals', builder: (_, __) => const ReferralsPage()),
-          GoRoute(path: '/gamification', builder: (_, __) => const GamificationPage()),
+          GoRoute(
+              path: '/withdrawals',
+              builder: (_, __) => const WithdrawalsPage()),
+          GoRoute(
+              path: '/referrals', builder: (_, __) => const ReferralsPage()),
+          GoRoute(
+              path: '/leaderboard',
+              builder: (_, __) => const LeaderboardPage()),
+          GoRoute(
+              path: '/gamification',
+              builder: (_, __) => const GamificationPage()),
           GoRoute(path: '/admin', builder: (_, __) => const AdminPage()),
         ],
       ),

@@ -15,23 +15,32 @@ Future<void> runRewardFlow(
   required String successLabel,
 }) async {
   final messenger = ScaffoldMessenger.of(context);
-  final reward = await action(ref.read(rewardedAdServiceProvider));
-  ref.invalidate(walletProvider);
-  ref.invalidate(gamificationProfileProvider);
-  ref.invalidate(leaderboardProvider);
-  ref.invalidate(adminMetricsProvider);
-  ref.invalidate(adminUsersProvider);
-  ref.invalidate(referralOverviewProvider);
-  if (context.mounted) {
-    await showCoinRewardCelebration(context, coins: reward);
-    await LocalNotificationsService.instance.showRewardEarned(
-      coins: reward,
-      title: 'Coins added',
-      body: successLabel,
-    );
-    messenger.showSnackBar(
-      SnackBar(content: Text('$successLabel $reward coins')),
-    );
+  try {
+    final reward = await action(ref.read(rewardedAdServiceProvider));
+    ref.invalidate(walletProvider);
+    ref.invalidate(gamificationProfileProvider);
+    ref.invalidate(leaderboardProvider);
+    ref.invalidate(adminMetricsProvider);
+    ref.invalidate(adminUsersProvider);
+    ref.invalidate(referralOverviewProvider);
+    if (context.mounted) {
+      await showCoinRewardCelebration(context, coins: reward);
+      await LocalNotificationsService.instance.showRewardEarned(
+        coins: reward,
+        title: 'Coins added',
+        body: successLabel,
+      );
+      messenger.showSnackBar(
+        SnackBar(content: Text('$successLabel $reward coins')),
+      );
+    }
+  } catch (error) {
+    if (context.mounted) {
+      messenger.showSnackBar(
+        SnackBar(
+            content: Text(error.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
   }
 }
 
@@ -54,7 +63,9 @@ class RewardedAdPanel extends ConsumerWidget {
               ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Rewarded ads', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                    const Text('Rewarded ads',
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.w700)),
                     const SizedBox(height: 8),
                     const Text(
                       'Watch rewarded videos to earn coins that move into pending rewards before becoming withdrawable.',
@@ -78,7 +89,9 @@ class RewardedAdPanel extends ConsumerWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Rewarded ads', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+                          Text('Rewarded ads',
+                              style: TextStyle(
+                                  fontSize: 22, fontWeight: FontWeight.w700)),
                           SizedBox(height: 8),
                           Text(
                             'Watch rewarded videos to earn coins that move into pending rewards before becoming withdrawable.',
@@ -143,9 +156,12 @@ class CompactRewardedAdCard extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 14),
-          Text(title, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+          Text(title,
+              style:
+                  const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
           const SizedBox(height: 10),
-          Text(body, style: const TextStyle(color: Color(0xFF9CB1AA), height: 1.5)),
+          Text(body,
+              style: const TextStyle(color: Color(0xFF9CB1AA), height: 1.5)),
           const SizedBox(height: 18),
           FilledButton.icon(
             onPressed: () => runRewardFlow(

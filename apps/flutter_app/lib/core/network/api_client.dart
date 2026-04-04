@@ -9,6 +9,7 @@ import '../models/offer_model.dart';
 import '../models/referral_overview.dart';
 import '../models/user_session.dart';
 import '../models/wallet_summary.dart';
+import '../models/withdrawal_request.dart';
 import 'mock_backend.dart';
 
 class ApiClient {
@@ -46,7 +47,8 @@ class ApiClient {
     final response = await _dio.get<Map<String, dynamic>>('/auth/me');
     return UserSession(
       accessToken: token,
-      user: SessionUser.fromJson(response.data!['user'] as Map<String, dynamic>),
+      user:
+          SessionUser.fromJson(response.data!['user'] as Map<String, dynamic>),
     );
   }
 
@@ -147,7 +149,8 @@ class ApiClient {
     return session;
   }
 
-  Future<List<OfferModel>> getOffers({required String userId, required String country}) async {
+  Future<List<OfferModel>> getOffers(
+      {required String userId, required String country}) async {
     if (AppConstants.useMockApi) {
       return _mockBackend.getOffers(userId: userId, country: country);
     }
@@ -172,7 +175,8 @@ class ApiClient {
       return _mockBackend.completeOffer(userId: userId, offerId: offerId);
     }
 
-    throw UnimplementedError('Real offer completion simulation is not implemented.');
+    throw UnimplementedError(
+        'Real offer completion simulation is not implemented.');
   }
 
   Future<int> settlePendingRewards() async {
@@ -193,7 +197,10 @@ class ApiClient {
     return WalletSummary.fromJson(response.data!);
   }
 
-  Future<void> requestWithdrawal({required String method, required String destination, required int coins}) async {
+  Future<void> requestWithdrawal(
+      {required String method,
+      required String destination,
+      required int coins}) async {
     if (AppConstants.useMockApi) {
       return _mockBackend.requestWithdrawal(
         userId: _requireUserId(),
@@ -210,12 +217,25 @@ class ApiClient {
     });
   }
 
+  Future<List<WithdrawalRequestModel>> getWithdrawals() async {
+    if (AppConstants.useMockApi) {
+      return _mockBackend.getWithdrawals(_requireUserId());
+    }
+
+    final response = await _dio.get<List<dynamic>>('/withdrawals');
+    return (response.data ?? <dynamic>[])
+        .map((item) =>
+            WithdrawalRequestModel.fromJson(item as Map<String, dynamic>))
+        .toList();
+  }
+
   Future<GamificationProfile> getGamificationProfile() async {
     if (AppConstants.useMockApi) {
       return _mockBackend.getGamificationProfile(_requireUserId());
     }
 
-    final response = await _dio.get<Map<String, dynamic>>('/gamification/profile');
+    final response =
+        await _dio.get<Map<String, dynamic>>('/gamification/profile');
     return GamificationProfile.fromJson(response.data!);
   }
 
@@ -235,7 +255,8 @@ class ApiClient {
       return _mockBackend.getReferralOverview(_requireUserId());
     }
 
-    final response = await _dio.get<Map<String, dynamic>>('/referrals/overview');
+    final response =
+        await _dio.get<Map<String, dynamic>>('/referrals/overview');
     return ReferralOverview.fromJson(response.data!);
   }
 
@@ -267,7 +288,8 @@ class ApiClient {
     final response = await _dio.get<List<dynamic>>('/admin/withdrawals');
     return (response.data ?? <dynamic>[])
         .map(
-          (item) => AdminWithdrawalRequest.fromJson(item as Map<String, dynamic>),
+          (item) =>
+              AdminWithdrawalRequest.fromJson(item as Map<String, dynamic>),
         )
         .toList();
   }
@@ -369,13 +391,18 @@ class ApiClient {
       return _mockBackend.activateStepBoost(_requireUserId());
     }
 
-    final response = await _dio.post<Map<String, dynamic>>('/fitness/move/boost');
+    final response =
+        await _dio.post<Map<String, dynamic>>('/fitness/move/boost');
     return MoveEarnOverview.fromJson(response.data!);
   }
 
-  Future<int> confirmAdReward({required String adUnitId, required String sessionId, required int coins}) async {
+  Future<int> confirmAdReward(
+      {required String adUnitId,
+      required String sessionId,
+      required int coins}) async {
     if (AppConstants.useMockApi) {
-      return _mockBackend.confirmAdReward(userId: _requireUserId(), coins: coins);
+      return _mockBackend.confirmAdReward(
+          userId: _requireUserId(), coins: coins);
     }
 
     await _dio.post<void>('/ads/reward', data: {
@@ -384,6 +411,28 @@ class ApiClient {
       'coins': coins,
     });
     return coins;
+  }
+
+  Future<int> claimMiniGameReward({
+    required String gameId,
+    required int score,
+  }) async {
+    if (AppConstants.useMockApi) {
+      return _mockBackend.claimMiniGameReward(
+        userId: _requireUserId(),
+        gameId: gameId,
+        score: score,
+      );
+    }
+
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/mini-games/claim',
+      data: {
+        'gameId': gameId,
+        'score': score,
+      },
+    );
+    return response.data?['coinsAwarded'] as int? ?? 0;
   }
 
   String _requireUserId() {
@@ -414,7 +463,8 @@ class ApiClient {
       'runMinutes': snapshot.runMinutes,
       'calories': snapshot.calories,
       'message': snapshot.message,
-      'weeklyHistory': snapshot.weeklyHistory.map((item) => item.toJson()).toList(),
+      'weeklyHistory':
+          snapshot.weeklyHistory.map((item) => item.toJson()).toList(),
     };
   }
 }

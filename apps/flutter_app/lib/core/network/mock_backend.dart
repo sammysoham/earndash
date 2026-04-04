@@ -8,6 +8,7 @@ import '../models/offer_model.dart';
 import '../models/referral_overview.dart';
 import '../models/user_session.dart';
 import '../models/wallet_summary.dart';
+import '../models/withdrawal_request.dart';
 
 class MockBackend {
   MockBackend._() {
@@ -69,25 +70,44 @@ class MockBackend {
               email: normalized,
               displayName: _displayNameFromEmail(normalized),
               role: normalized == 'admin@earndash.dev' ? 'ADMIN' : 'USER',
-              referralCode: _generateReferralCode(_displayNameFromEmail(normalized)),
+              referralCode:
+                  _generateReferralCode(_displayNameFromEmail(normalized)),
               countryCode: 'US',
               fraudScore: normalized == 'admin@earndash.dev' ? 6 : 12,
               totalCoins: normalized == 'admin@earndash.dev' ? 12480 : 3200,
               pendingCoins: normalized == 'admin@earndash.dev' ? 3200 : 600,
-              withdrawableCoins: normalized == 'admin@earndash.dev' ? 9280 : 2600,
+              withdrawableCoins:
+                  normalized == 'admin@earndash.dev' ? 9280 : 2600,
               lifetimeEarned: normalized == 'admin@earndash.dev' ? 68420 : 9700,
               xp: normalized == 'admin@earndash.dev' ? 2860 : 840,
               dailyStreak: normalized == 'admin@earndash.dev' ? 5 : 3,
               referredEarners: normalized == 'admin@earndash.dev' ? 18 : 2,
-              commissionEarnedCoins: normalized == 'admin@earndash.dev' ? 4920 : 180,
+              commissionEarnedCoins:
+                  normalized == 'admin@earndash.dev' ? 4920 : 180,
               activeReferrals: normalized == 'admin@earndash.dev'
                   ? <ReferralEntry>[
-                      ReferralEntry(displayName: 'Ava', lifetimeEarnedCoins: 12400, commissionCoins: 1240, status: 'Healthy'),
-                      ReferralEntry(displayName: 'Noah', lifetimeEarnedCoins: 9800, commissionCoins: 980, status: 'Healthy'),
-                      ReferralEntry(displayName: 'Mia', lifetimeEarnedCoins: 7600, commissionCoins: 760, status: 'Review-free'),
+                      ReferralEntry(
+                          displayName: 'Ava',
+                          lifetimeEarnedCoins: 12400,
+                          commissionCoins: 1240,
+                          status: 'Healthy'),
+                      ReferralEntry(
+                          displayName: 'Noah',
+                          lifetimeEarnedCoins: 9800,
+                          commissionCoins: 980,
+                          status: 'Healthy'),
+                      ReferralEntry(
+                          displayName: 'Mia',
+                          lifetimeEarnedCoins: 7600,
+                          commissionCoins: 760,
+                          status: 'Review-free'),
                     ]
                   : <ReferralEntry>[
-                      ReferralEntry(displayName: 'Kai', lifetimeEarnedCoins: 1200, commissionCoins: 120, status: 'Healthy'),
+                      ReferralEntry(
+                          displayName: 'Kai',
+                          lifetimeEarnedCoins: 1200,
+                          commissionCoins: 120,
+                          status: 'Healthy'),
                     ],
               createdAt: DateTime.now().subtract(const Duration(days: 30)),
             );
@@ -299,12 +319,10 @@ class MockBackend {
       return AdminMetrics(
         totalUsers: totalUsers,
         dailyActiveUsers: dau,
-        offerConversionRate: _offerStarts == 0
-            ? 0
-            : (_completedOffers / _offerStarts) * 100,
-        withdrawalRate: totalUsers == 0
-            ? 0
-            : (_withdrawals.length / totalUsers) * 100,
+        offerConversionRate:
+            _offerStarts == 0 ? 0 : (_completedOffers / _offerStarts) * 100,
+        withdrawalRate:
+            totalUsers == 0 ? 0 : (_withdrawals.length / totalUsers) * 100,
         fraudRate: totalUsers == 0 ? 0 : (fraudUsers / totalUsers) * 100,
         averageLtvUsd:
             totalUsers == 0 ? 0 : (totalLifetimeCoins / 1000) / totalUsers,
@@ -397,7 +415,8 @@ class MockBackend {
             (item) => AdminWithdrawalRequest(
               id: item.id,
               userId: item.userId,
-              userDisplayName: _usersById[item.userId]?.displayName ?? 'Unknown',
+              userDisplayName:
+                  _usersById[item.userId]?.displayName ?? 'Unknown',
               method: item.method,
               destination: item.destination,
               coins: item.coins,
@@ -469,7 +488,8 @@ class MockBackend {
   }) {
     return _withLatency(() {
       _assertAdmin(adminUserId);
-      final withdrawal = _withdrawals.firstWhere((item) => item.id == withdrawalId);
+      final withdrawal =
+          _withdrawals.firstWhere((item) => item.id == withdrawalId);
       final user = _usersById[withdrawal.userId]!;
       final nextStatus = status.trim().toUpperCase();
       final shouldRefund = nextStatus == 'REJECTED' &&
@@ -511,7 +531,8 @@ class MockBackend {
   }) {
     return _withLatency(() {
       final user = _usersById[userId]!;
-      final offer = _offers.firstWhere((item) => item.externalOfferId == offerId);
+      final offer =
+          _offers.firstWhere((item) => item.externalOfferId == offerId);
       _offerStarts += 1;
       _completedOffers += 1;
 
@@ -592,6 +613,77 @@ class MockBackend {
     });
   }
 
+  Future<int> claimMiniGameReward({
+    required String userId,
+    required String gameId,
+    required int score,
+  }) {
+    return _withLatency(() {
+      final user = _usersById[userId]!;
+      if (score <= 0) {
+        throw Exception('Finish a game with a score before claiming coins.');
+      }
+
+      final now = DateTime.now();
+      final todayCoins = user.transactions
+          .where(
+            (item) =>
+                item.referenceType == 'MINI_GAME' &&
+                item.coins > 0 &&
+                item.createdAt.year == now.year &&
+                item.createdAt.month == now.month &&
+                item.createdAt.day == now.day,
+          )
+          .fold<int>(0, (sum, item) => sum + item.coins);
+      if (todayCoins >= 12) {
+        throw Exception('Mini game daily cap reached. Come back tomorrow.');
+      }
+
+      final latestForGame =
+          user.transactions.cast<WalletTransactionModel?>().firstWhere(
+                (item) => item != null && item.type == 'MINI_GAME_$gameId',
+                orElse: () => null,
+              );
+      if (latestForGame != null &&
+          now.difference(latestForGame.createdAt).inSeconds < 30) {
+        final waitSeconds =
+            30 - now.difference(latestForGame.createdAt).inSeconds;
+        throw Exception(
+            'Please wait ${waitSeconds}s before claiming this mini game again.');
+      }
+
+      final divisor = switch (gameId) {
+        'CARROM' => 35,
+        'POOL' => 28,
+        'TABLE_TENNIS' => 8,
+        _ => 40,
+      };
+      final reward =
+          min(3, min(12 - todayCoins, max(1, (score / divisor).ceil())));
+
+      user.totalCoins += reward;
+      user.pendingCoins += reward;
+      user.lifetimeEarned += reward;
+      user.xp += reward * 4;
+      user.level = _levelForXp(user.xp);
+      user.transactions.insert(
+        0,
+        _transaction(
+          type: 'MINI_GAME_$gameId',
+          status: 'PENDING',
+          coins: reward,
+          referenceType: 'MINI_GAME',
+        ),
+      );
+      _ensureAchievement(
+        user,
+        title: 'Arcade starter',
+        description: 'Claimed coins from the mini games corner.',
+      );
+      return reward;
+    });
+  }
+
   Future<void> requestWithdrawal({
     required String userId,
     required String method,
@@ -649,6 +741,27 @@ class MockBackend {
           referenceType: method,
         ),
       );
+    });
+  }
+
+  Future<List<WithdrawalRequestModel>> getWithdrawals(String userId) {
+    return _withLatency(() {
+      return _withdrawals
+          .where((item) => item.userId == userId)
+          .toList()
+          .reversed
+          .map(
+            (item) => WithdrawalRequestModel(
+              id: item.id,
+              method: item.method,
+              destination: item.destination,
+              coins: item.coins,
+              status: item.status,
+              createdAt: item.requestedAt,
+              note: item.note,
+            ),
+          )
+          .toList();
     });
   }
 
@@ -759,9 +872,21 @@ class MockBackend {
       referredEarners: 18,
       commissionEarnedCoins: 4920,
       activeReferrals: <ReferralEntry>[
-        ReferralEntry(displayName: 'Ava', lifetimeEarnedCoins: 12400, commissionCoins: 1240, status: 'Healthy'),
-        ReferralEntry(displayName: 'Noah', lifetimeEarnedCoins: 9800, commissionCoins: 980, status: 'Healthy'),
-        ReferralEntry(displayName: 'Mia', lifetimeEarnedCoins: 7600, commissionCoins: 760, status: 'Review-free'),
+        ReferralEntry(
+            displayName: 'Ava',
+            lifetimeEarnedCoins: 12400,
+            commissionCoins: 1240,
+            status: 'Healthy'),
+        ReferralEntry(
+            displayName: 'Noah',
+            lifetimeEarnedCoins: 9800,
+            commissionCoins: 980,
+            status: 'Healthy'),
+        ReferralEntry(
+            displayName: 'Mia',
+            lifetimeEarnedCoins: 7600,
+            commissionCoins: 760,
+            status: 'Review-free'),
       ],
       createdAt: DateTime.now().subtract(const Duration(days: 180)),
     );
@@ -825,8 +950,16 @@ class MockBackend {
     );
     nia.referredByUserId = sara.id;
     sara.activeReferrals = <ReferralEntry>[
-      ReferralEntry(displayName: 'Leo', lifetimeEarnedCoins: leo.lifetimeEarned, commissionCoins: 120, status: 'Review'),
-      ReferralEntry(displayName: 'Nia', lifetimeEarnedCoins: nia.lifetimeEarned, commissionCoins: 215, status: 'Healthy'),
+      ReferralEntry(
+          displayName: 'Leo',
+          lifetimeEarnedCoins: leo.lifetimeEarned,
+          commissionCoins: 120,
+          status: 'Review'),
+      ReferralEntry(
+          displayName: 'Nia',
+          lifetimeEarnedCoins: nia.lifetimeEarned,
+          commissionCoins: 215,
+          status: 'Healthy'),
     ];
 
     for (final user in _usersById.values) {
@@ -967,10 +1100,9 @@ class MockBackend {
     final updatedEntry = ReferralEntry(
       displayName: earningUser.displayName,
       lifetimeEarnedCoins: earningUser.lifetimeEarned,
-      commissionCoins: (index >= 0
-              ? referrer.activeReferrals[index].commissionCoins
-              : 0) +
-          commission,
+      commissionCoins:
+          (index >= 0 ? referrer.activeReferrals[index].commissionCoins : 0) +
+              commission,
       status: earningUser.fraudScore >= 60 ? 'Review' : 'Healthy',
     );
     if (index >= 0) {
@@ -1117,12 +1249,14 @@ class MockBackend {
     user.trackingMessage = snapshot.message;
 
     if (snapshot.weeklyHistory.isNotEmpty) {
-      final previousRewardedSteps = user.activityDateKey == snapshot.todayDateKey
-          ? user.todayActivity.rewardedSteps
-          : 0;
-      final previousRewardedCoins = user.activityDateKey == snapshot.todayDateKey
-          ? user.todayActivity.rewardedCoins
-          : 0;
+      final previousRewardedSteps =
+          user.activityDateKey == snapshot.todayDateKey
+              ? user.todayActivity.rewardedSteps
+              : 0;
+      final previousRewardedCoins =
+          user.activityDateKey == snapshot.todayDateKey
+              ? user.todayActivity.rewardedCoins
+              : 0;
 
       user.activityDateKey = snapshot.todayDateKey;
       user.weeklyActivity = snapshot.weeklyHistory
@@ -1133,7 +1267,8 @@ class MockBackend {
               distanceKm: item.distanceKm,
               runDistanceKm: item.runMinutes <= 0
                   ? 0
-                  : item.distanceKm * (item.runMinutes / max(1, item.activeMinutes)),
+                  : item.distanceKm *
+                      (item.runMinutes / max(1, item.activeMinutes)),
               activeMinutes: item.activeMinutes,
               walkMinutes: item.walkMinutes,
               runMinutes: item.runMinutes,
@@ -1183,7 +1318,8 @@ class MockBackend {
     final consumedSteps = stepChunks * 1000;
     user.todayActivity.rewardedSteps += consumedSteps;
     user.todayActivity.rewardedCoins += earnedCoins;
-    user.weeklyActivity[user.weeklyActivity.length - 1] = user.todayActivity.copy();
+    user.weeklyActivity[user.weeklyActivity.length - 1] =
+        user.todayActivity.copy();
     user.totalCoins += earnedCoins;
     user.withdrawableCoins += earnedCoins;
     user.lifetimeEarned += earnedCoins;
@@ -1239,7 +1375,8 @@ class MockBackend {
   }
 
   void _updateActivityRank(_MockUser user) {
-    final weeklySteps = user.weeklyActivity.fold<int>(0, (sum, item) => sum + item.steps);
+    final weeklySteps =
+        user.weeklyActivity.fold<int>(0, (sum, item) => sum + item.steps);
     user.fitnessRank = _activityRank(weeklySteps);
     switch (user.fitnessRank) {
       case 'Elite':
@@ -1319,11 +1456,10 @@ class MockBackend {
   }
 
   String _generateReferralCode(String displayName) {
-    final safe = displayName
-        .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')
-        .toUpperCase();
-    final prefix =
-        (safe.isEmpty ? 'USER' : safe).substring(0, min(6, max(1, safe.length)));
+    final safe =
+        displayName.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+    final prefix = (safe.isEmpty ? 'USER' : safe)
+        .substring(0, min(6, max(1, safe.length)));
     return '$prefix${100 + _random.nextInt(899)}';
   }
 }

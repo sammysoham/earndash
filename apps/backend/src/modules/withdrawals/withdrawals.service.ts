@@ -88,6 +88,10 @@ export class WithdrawalsService {
     return this.withdrawalsRepository.findPendingReview();
   }
 
+  userRecent(userId: string) {
+    return this.withdrawalsRepository.findByUserId(userId);
+  }
+
   recent() {
     return this.withdrawalsRepository.listRecent();
   }
@@ -103,6 +107,7 @@ export class WithdrawalsService {
       throw new NotFoundException('Withdrawal not found');
     }
 
+    const previousStatus = withdrawal.status;
     withdrawal.approvedBy = actorId;
     withdrawal.metadata = { ...(withdrawal.metadata ?? {}), note: note ?? null };
 
@@ -110,6 +115,7 @@ export class WithdrawalsService {
       withdrawal.status = WithdrawalStatus.APPROVED;
       await this.withdrawalsRepository.save(withdrawal);
     } else {
+      await this.refundIfNeeded(withdrawal, previousStatus);
       withdrawal.status = WithdrawalStatus.REJECTED;
       await this.withdrawalsRepository.save(withdrawal);
     }
@@ -133,11 +139,16 @@ export class WithdrawalsService {
       throw new NotFoundException('Withdrawal not found');
     }
 
+    const previousStatus = withdrawal.status;
     withdrawal.approvedBy = actorId;
     withdrawal.status = status;
     withdrawal.metadata = { ...(withdrawal.metadata ?? {}), note: note ?? null };
     if (status === WithdrawalStatus.PAID) {
       withdrawal.processedAt = new Date();
+    }
+
+    if (status === WithdrawalStatus.REJECTED) {
+      await this.refundIfNeeded(withdrawal, previousStatus);
     }
 
     await this.withdrawalsRepository.save(withdrawal);
@@ -168,6 +179,33 @@ export class WithdrawalsService {
       withdrawal.id,
       { method: withdrawal.method },
     );
+  }
+
+  private async refundIfNeeded(
+    withdrawal: Withdrawal,
+    previousStatus: WithdrawalStatus,
+  ): Promise<void> {
+    if (previousStatus === WithdrawalStatus.REJECTED || previousStatus === WithdrawalStatus.PAID) {
+      return;
+    }
+
+    const alreadyRefunded =
+      withdrawal.metadata != null &&
+      typeof withdrawal.metadata['refundApplied'] === 'boolean' &&
+      withdrawal.metadata['refundApplied'] === true;
+    if (alreadyRefunded) {
+      return;
+    }
+
+    await this.walletService.refundWithdrawalReservation(
+      withdrawal.userId,
+      withdrawal.coins,
+      withdrawal.id,
+    );
+    withdrawal.metadata = {
+      ...(withdrawal.metadata ?? {}),
+      refundApplied: true,
+    };
   }
 }
 

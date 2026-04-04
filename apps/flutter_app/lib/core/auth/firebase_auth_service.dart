@@ -23,7 +23,7 @@ class FirebaseAuthService {
   })  : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance,
         _googleSignIn = googleSignIn ??
             GoogleSignIn(
-              clientId: AppConstants.firebaseGoogleWebClientId.isEmpty
+              serverClientId: AppConstants.firebaseGoogleWebClientId.isEmpty
                   ? null
                   : AppConstants.firebaseGoogleWebClientId,
             );
@@ -58,8 +58,8 @@ class FirebaseAuthService {
       displayName: user.displayName?.trim().isNotEmpty == true
           ? user.displayName!.trim()
           : user.email!.split('@').first,
-      providerUserId: user.uid,
-      idToken: firebaseIdToken,
+      providerUserId: googleUser.id,
+      idToken: googleAuth.idToken ?? firebaseIdToken,
     );
   }
 

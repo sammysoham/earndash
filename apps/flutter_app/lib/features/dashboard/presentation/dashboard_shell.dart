@@ -13,11 +13,29 @@ class DashboardShell extends ConsumerStatefulWidget {
   static const _items = <({String label, IconData icon, String path})>[
     (label: 'Home', icon: Icons.space_dashboard_outlined, path: '/dashboard'),
     (label: 'Move & Earn', icon: Icons.directions_walk_outlined, path: '/move'),
+    (
+      label: 'Mini Games',
+      icon: Icons.sports_esports_outlined,
+      path: '/mini-games'
+    ),
     (label: 'Watch & Earn', icon: Icons.ondemand_video_outlined, path: '/ads'),
-    (label: 'Offerwall', icon: Icons.local_activity_outlined, path: '/offerwall'),
-    (label: 'Wallet', icon: Icons.account_balance_wallet_outlined, path: '/wallet'),
+    (
+      label: 'Offerwall',
+      icon: Icons.local_activity_outlined,
+      path: '/offerwall'
+    ),
+    (
+      label: 'Wallet',
+      icon: Icons.account_balance_wallet_outlined,
+      path: '/wallet'
+    ),
     (label: 'Withdrawals', icon: Icons.payments_outlined, path: '/withdrawals'),
     (label: 'Referrals', icon: Icons.group_add_outlined, path: '/referrals'),
+    (
+      label: 'Leaderboard',
+      icon: Icons.leaderboard_outlined,
+      path: '/leaderboard'
+    ),
     (label: 'Levels', icon: Icons.emoji_events_outlined, path: '/gamification'),
     (label: 'Admin', icon: Icons.admin_panel_settings_outlined, path: '/admin'),
   ];
@@ -70,13 +88,17 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
                                 children: [
                                   const EarndashBrand(compact: true),
                                   const SizedBox(height: 4),
-                                  Text(session?.user.displayName ?? 'Operator', style: const TextStyle(color: Color(0xFF9CB1AA))),
+                                  Text(session?.user.displayName ?? 'Operator',
+                                      style: const TextStyle(
+                                          color: Color(0xFF9CB1AA))),
                                 ],
                               ),
                             ),
                             FilledButton.tonal(
                               onPressed: () async {
-                                await ref.read(authControllerProvider.notifier).logout();
+                                await ref
+                                    .read(authControllerProvider.notifier)
+                                    .logout();
                                 if (context.mounted) {
                                   context.go('/login');
                                 }
@@ -90,18 +112,18 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
                           scrollDirection: Axis.horizontal,
                           child: Row(
                             children: [
-                                  for (final item in items)
-                                    Padding(
-                                      padding: const EdgeInsets.only(right: 8),
-                                      child: ChoiceChip(
-                                        avatar: Icon(item.icon, size: 18),
-                                        label: Text(item.label),
-                                        selected: location == item.path,
-                                        onSelected: (_) => _navigateTo(item.path),
-                                      ),
-                                    ),
-                                ],
-                              ),
+                              for (final item in items)
+                                Padding(
+                                  padding: const EdgeInsets.only(right: 8),
+                                  child: ChoiceChip(
+                                    avatar: Icon(item.icon, size: 18),
+                                    label: Text(item.label),
+                                    selected: location == item.path,
+                                    onSelected: (_) => _navigateTo(item.path),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ),
                       ],
                     ),
@@ -131,13 +153,15 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
                     children: [
                       const EarndashBrand(compact: true),
                       const SizedBox(height: 8),
-                      Text(session?.user.displayName ?? 'Operator', style: const TextStyle(color: Color(0xFF9CB1AA))),
+                      Text(session?.user.displayName ?? 'Operator',
+                          style: const TextStyle(color: Color(0xFF9CB1AA))),
                       const SizedBox(height: 28),
                       for (final item in items)
                         Padding(
                           padding: const EdgeInsets.only(bottom: 8),
                           child: ListTile(
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18)),
                             selected: location == item.path,
                             selectedTileColor: const Color(0x1A59F3C3),
                             leading: Icon(item.icon),
@@ -148,7 +172,9 @@ class _DashboardShellState extends ConsumerState<DashboardShell> {
                       const Spacer(),
                       FilledButton.tonal(
                         onPressed: () async {
-                          await ref.read(authControllerProvider.notifier).logout();
+                          await ref
+                              .read(authControllerProvider.notifier)
+                              .logout();
                           if (context.mounted) {
                             context.go('/login');
                           }

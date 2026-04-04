@@ -189,7 +189,9 @@ class _AdminPageState extends ConsumerState<AdminPage> {
                 runSpacing: 16,
                 children: [
                   _MiniStat(label: 'Total', value: '${user.totalCoins}'),
-                  _MiniStat(label: 'Withdrawable', value: '${user.withdrawableCoins}'),
+                  _MiniStat(
+                      label: 'Withdrawable',
+                      value: '${user.withdrawableCoins}'),
                   _MiniStat(label: 'Pending', value: '${user.pendingCoins}'),
                   _MiniStat(label: 'Lifetime', value: '${user.lifetimeEarned}'),
                   _MiniStat(label: 'Streak', value: '${user.dailyStreak}d'),
@@ -215,9 +217,8 @@ class _AdminPageState extends ConsumerState<AdminPage> {
                     label: const Text('Gift coins'),
                   ),
                   OutlinedButton.icon(
-                    onPressed: user.role == 'ADMIN'
-                        ? null
-                        : () => _toggleBlock(user),
+                    onPressed:
+                        user.role == 'ADMIN' ? null : () => _toggleBlock(user),
                     icon: Icon(user.isBlocked
                         ? Icons.lock_open_outlined
                         : Icons.block_outlined),
@@ -260,7 +261,7 @@ class _AdminPageState extends ConsumerState<AdminPage> {
                   ),
                   _StatusPill(
                     label: item.status,
-                    color: item.status == 'PENDING_APPROVAL'
+                    color: item.status == 'PENDING_ADMIN_REVIEW'
                         ? const Color(0xFFFFD66E)
                         : item.status == 'REJECTED'
                             ? const Color(0xFFFF8E8E)
@@ -275,7 +276,8 @@ class _AdminPageState extends ConsumerState<AdminPage> {
               ),
               if (item.note != null && item.note!.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(item.note!, style: const TextStyle(color: Color(0xFF8FD9AE))),
+                Text(item.note!,
+                    style: const TextStyle(color: Color(0xFF8FD9AE))),
               ],
               const SizedBox(height: 16),
               Wrap(
@@ -287,7 +289,7 @@ class _AdminPageState extends ConsumerState<AdminPage> {
                       onPressed: () => _setWithdrawalStatus(item, 'APPROVED'),
                       child: const Text('Approve'),
                     ),
-                  if (item.status != 'PAID')
+                  if (item.status == 'APPROVED' || item.status == 'QUEUED')
                     OutlinedButton(
                       onPressed: () => _setWithdrawalStatus(item, 'PAID'),
                       child: const Text('Mark paid'),

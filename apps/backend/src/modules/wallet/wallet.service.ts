@@ -242,4 +242,36 @@ export class WalletService {
       );
     });
   }
+
+  async refundWithdrawalReservation(
+    userId: string,
+    coins: number,
+    withdrawalId: string,
+  ): Promise<void> {
+    await this.dataSource.transaction(async (manager) => {
+      const walletRepository = manager.getRepository(Wallet);
+      const transactionRepository = manager.getRepository(WalletTransaction);
+
+      const wallet = await walletRepository.findOneByOrFail({ userId });
+      wallet.totalCoins += coins;
+      wallet.withdrawableCoins += coins;
+      const savedWallet = await walletRepository.save(wallet);
+
+      await transactionRepository.save(
+        transactionRepository.create({
+          walletId: savedWallet.id,
+          userId,
+          type: WalletTransactionType.ADJUSTMENT,
+          status: WalletTransactionStatus.COMPLETED,
+          coins,
+          usdAmount: coinsToUsd(coins).toFixed(2),
+          referenceType: 'WITHDRAWAL_REFUND',
+          referenceId: withdrawalId,
+          metadata: {
+            reason: 'Withdrawal rejected or cancelled',
+          },
+        }),
+      );
+    });
+  }
 }
