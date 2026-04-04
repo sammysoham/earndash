@@ -6,9 +6,9 @@ class AppConstants {
     'API_BASE_URL',
     defaultValue: 'https://earndash-api.onrender.com/api',
   );
-  static const int coinsPerDollar = 1000;
-  static const int minWithdrawalCoins = 5000;
-  static const int newUserDailyWithdrawalCapCoins = 20000;
+  static const int coinsPerDollar = 10000;
+  static const int minWithdrawalCoins = 50000;
+  static const int newUserDailyWithdrawalCapCoins = 200000;
   static const int pendingRewardHoldDays = 14;
   static const String authTokenKey = 'earndash_auth_token';
   static const bool useMockApi = bool.fromEnvironment(

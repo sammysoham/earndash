@@ -13,7 +13,7 @@ These terms are intended to protect platform integrity, reward quality, fraud en
 ## 2. Coins, balances, and conversions
 
 - Coins are promotional credits within the EarnDash platform. They are not bank deposits, stored cash, or guaranteed property rights.
-- The current in-app reference is 1,000 coins to 1 USD, but EarnDash may update reward values, thresholds, conversion references, and payout rules at any time.
+- The current in-app reference is 10,000 coins to 1 USD, but EarnDash may update reward values, thresholds, conversion references, and payout rules at any time.
 - Pending, withdrawable, and lifetime balances are internal ledger states that may be corrected, reduced, reversed, or withheld after partner reconciliation, fraud review, or technical investigation.
 
 ## 3. Reward eligibility and reversals

@@ -17,7 +17,7 @@ class TermsPage extends StatelessWidget {
       title: '2. Coins, balances, and conversions',
       points: [
         'Coins are promotional platform credits. They do not represent stored cash, a bank balance, or a guaranteed property right.',
-        'The current in-app conversion reference is 1,000 coins to 1 USD, but EarnDash may change exchange rates, reward values, payout methods, daily limits, and eligibility rules at any time.',
+        'The current in-app conversion reference is 10,000 coins to 1 USD, but EarnDash may change exchange rates, reward values, payout methods, daily limits, and eligibility rules at any time.',
         'Pending, withdrawable, and lifetime balances are internal status indicators maintained by EarnDash and may be corrected, reduced, reversed, or held after reviews, partner clawbacks, fraud flags, or technical reconciliation.',
       ],
     ),

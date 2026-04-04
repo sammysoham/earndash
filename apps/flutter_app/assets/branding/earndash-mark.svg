@@ -1,0 +1,20 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="markGrad" x1="220" y1="150" x2="760" y2="820" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00E676"/>
+      <stop offset="1" stop-color="#0F7A42"/>
+    </linearGradient>
+    <filter id="glow" x="80" y="80" width="864" height="864" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="52" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0.901961  0 0 1 0 0.462745  0 0 0 0.32 0"/>
+    </filter>
+  </defs>
+
+  <rect x="184" y="200" width="656" height="656" rx="170" fill="#00E676" opacity="0.25" filter="url(#glow)"/>
+  <rect x="184" y="184" width="656" height="656" rx="170" fill="url(#markGrad)"/>
+  <g transform="translate(512 512) rotate(-34) translate(-512 -512)">
+    <rect x="396" y="282" width="154" height="380" rx="70" fill="#04110A"/>
+  </g>
+  <circle cx="678" cy="382" r="72" fill="#B5FF73"/>
+  <rect x="412" y="642" width="202" height="62" rx="31" fill="#04110A"/>
+</svg>

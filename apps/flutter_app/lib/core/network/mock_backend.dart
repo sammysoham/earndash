@@ -705,7 +705,7 @@ class MockBackend {
       if (user.isBlocked) {
         throw Exception('Withdrawals are disabled on this account');
       }
-      if (coins < 5000) {
+      if (coins < 50000) {
         throw Exception('Minimum withdrawal is 5,000 coins');
       }
       if (user.withdrawableCoins < coins) {
@@ -724,7 +724,7 @@ class MockBackend {
                   item.status != 'REJECTED',
             )
             .fold<int>(0, (sum, item) => sum + item.coins);
-        if (todayTotal + coins > 20000) {
+        if (todayTotal + coins > 200000) {
           throw Exception('New users are capped at 20,000 coins per day');
         }
       }
@@ -1020,7 +1020,7 @@ class MockBackend {
         userId: sara.id,
         method: 'PAYPAL',
         destination: 'sara@paypal.test',
-        coins: 5000,
+        coins: 50000,
         status: 'PENDING_APPROVAL',
         requestedAt: DateTime.now().subtract(const Duration(hours: 5)),
         note: 'First cash out',
@@ -1030,7 +1030,7 @@ class MockBackend {
         userId: leo.id,
         method: 'USDT',
         destination: 'TRX-T12345',
-        coins: 6000,
+        coins: 60000,
         status: 'APPROVED',
         requestedAt: DateTime.now().subtract(const Duration(days: 1)),
         note: 'Manual review required',
@@ -1040,7 +1040,7 @@ class MockBackend {
         userId: nia.id,
         method: 'GIFT_CARD',
         destination: 'Amazon',
-        coins: 5000,
+        coins: 50000,
         status: 'REJECTED',
         requestedAt: DateTime.now().subtract(const Duration(days: 2)),
         note: 'KYC mismatch',

@@ -1,0 +1,23 @@
+<svg width="1600" height="520" viewBox="0 0 1600 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="markGrad" x1="110" y1="60" x2="350" y2="360" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00E676"/>
+      <stop offset="1" stop-color="#0F7A42"/>
+    </linearGradient>
+    <filter id="glow" x="0" y="0" width="520" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0.901961  0 0 1 0 0.462745  0 0 0 0.32 0"/>
+    </filter>
+  </defs>
+
+  <rect x="86" y="96" width="288" height="288" rx="78" fill="#00E676" opacity="0.25" filter="url(#glow)"/>
+  <rect x="96" y="86" width="288" height="288" rx="78" fill="url(#markGrad)"/>
+  <g transform="translate(240 230) rotate(-34) translate(-240 -230)">
+    <rect x="186" y="128" width="66" height="162" rx="28" fill="#04110A"/>
+  </g>
+  <circle cx="312" cy="180" r="28" fill="#B5FF73"/>
+  <rect x="202" y="286" width="82" height="26" rx="13" fill="#04110A"/>
+
+  <text x="470" y="228" fill="#F0F7F0" font-size="150" font-weight="800" font-family="Inter, Arial, Helvetica, sans-serif">EarnDash</text>
+  <text x="478" y="305" fill="#95B69F" font-size="46" font-weight="700" letter-spacing="1.2" font-family="Inter, Arial, Helvetica, sans-serif">earn  •  move  •  cash out</text>
+</svg>

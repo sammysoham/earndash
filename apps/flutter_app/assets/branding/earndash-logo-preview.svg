@@ -1,0 +1,24 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="900" rx="0" fill="#08120D"/>
+  <g transform="translate(160 190)">
+    <rect x="0" y="16" width="320" height="320" rx="88" fill="#00E676" opacity="0.25" filter="url(#glow)"/>
+    <rect x="12" y="0" width="320" height="320" rx="88" fill="url(#markGrad)"/>
+    <g transform="translate(172 160) rotate(-34) translate(-172 -160)">
+      <rect x="110" y="52" width="74" height="188" rx="32" fill="#04110A"/>
+    </g>
+    <circle cx="254" cy="112" r="32" fill="#B5FF73"/>
+    <rect x="126" y="224" width="92" height="30" rx="15" fill="#04110A"/>
+  </g>
+  <text x="560" y="390" fill="#F0F7F0" font-size="180" font-weight="800" font-family="Inter, Arial, Helvetica, sans-serif">EarnDash</text>
+  <text x="572" y="485" fill="#95B69F" font-size="58" font-weight="700" font-family="Inter, Arial, Helvetica, sans-serif">earn  •  move  •  cash out</text>
+  <defs>
+    <linearGradient id="markGrad" x1="36" y1="12" x2="314" y2="300" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#00E676"/>
+      <stop offset="1" stop-color="#0F7A42"/>
+    </linearGradient>
+    <filter id="glow" x="-80" y="-80" width="520" height="520" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="24" result="blur"/>
+      <feColorMatrix in="blur" type="matrix" values="1 0 0 0 0  0 1 0 0 0.901961  0 0 1 0 0.462745  0 0 0 0.32 0"/>
+    </filter>
+  </defs>
+</svg>
