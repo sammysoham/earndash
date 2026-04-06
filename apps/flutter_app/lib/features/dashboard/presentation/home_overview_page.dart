@@ -84,6 +84,7 @@ class HomeOverviewPage extends ConsumerWidget {
                       _AsyncMetricChip(label: 'Pending', value: wallet.when(data: (value) => '${value.pendingCoins} coins', loading: () => '...', error: (_, __) => '--')),
                       _AsyncMetricChip(label: 'Today steps', value: movement.when(data: (value) => '${value.todaySteps}', loading: () => '...', error: (_, __) => '--')),
                       _AsyncMetricChip(label: 'Daily streak', value: profile.when(data: (value) => '${value.dailyStreak} days', loading: () => '...', error: (_, __) => '--')),
+                      _AsyncMetricChip(label: 'Streak freezes', value: profile.when(data: (value) => '${value.streakFreezes}', loading: () => '...', error: (_, __) => '--')),
                       _AsyncMetricChip(label: 'Referrals', value: referrals.when(data: (value) => '${value.referredEarners}', loading: () => '...', error: (_, __) => '--')),
                     ],
                   ),
@@ -109,7 +110,7 @@ class HomeOverviewPage extends ConsumerWidget {
                 _FeatureCallout(
                   eyebrow: 'Growth loop',
                   title: 'Referrals and streaks give the app a stronger habit loop.',
-                  body: 'Users can share a code, earn referral commission, and stay active with daily progression.',
+                  body: 'Users can share a code, earn referral commission, collect daily login coins, and use streak freezes to protect momentum.',
                   accent: const Color(0xFFB5FF73),
                 ),
               ],

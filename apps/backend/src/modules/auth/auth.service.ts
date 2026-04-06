@@ -63,6 +63,7 @@ export class AuthService {
 
     const countryCode = this.lookupCountry(context.ipAddress);
     const antiVpnFlag = await this.fraudService.detectVpn(context.ipAddress);
+    this.assertVpnAllowed(antiVpnFlag);
 
     const user = await this.usersService.createUser({
       email: dto.email.toLowerCase(),
@@ -75,7 +76,8 @@ export class AuthService {
       antiVpnFlag,
       referralCode: this.generateReferralCode(dto.displayName),
       referredById: referrer?.id ?? null,
-      lastLoginAt: new Date(),
+      lastLoginAt: null,
+      lastDailyBonusClaimAt: null,
     });
 
     await this.walletService.ensureWallet(user.id);
@@ -119,6 +121,17 @@ export class AuthService {
 
     const countryCode = this.lookupCountry(context.ipAddress);
     const antiVpnFlag = await this.fraudService.detectVpn(context.ipAddress);
+    if (antiVpnFlag) {
+      await this.usersService.updateSignals(user, {
+        ipAddress: context.ipAddress,
+        deviceFingerprint: dto.deviceFingerprint,
+        deviceType: dto.deviceType,
+        advertisingId: dto.advertisingId,
+        countryCode,
+        antiVpnFlag,
+      });
+      this.assertVpnAllowed(true);
+    }
 
     await this.usersService.updateSignals(user, {
       ipAddress: context.ipAddress,
@@ -225,6 +238,22 @@ export class AuthService {
   ) {
     const countryCode = this.lookupCountry(context.ipAddress);
     const antiVpnFlag = await this.fraudService.detectVpn(context.ipAddress);
+    if (antiVpnFlag) {
+      const existingUser =
+        (await this.usersService.findByGoogleId(profile.googleId)) ??
+        (await this.usersService.findByEmail(profile.email));
+      if (existingUser) {
+        await this.usersService.updateSignals(existingUser, {
+          ipAddress: context.ipAddress,
+          deviceFingerprint: context.deviceFingerprint,
+          deviceType: context.deviceType,
+          advertisingId: context.advertisingId,
+          countryCode,
+          antiVpnFlag,
+        });
+      }
+      this.assertVpnAllowed(true);
+    }
     let user = await this.usersService.findByGoogleId(profile.googleId);
 
     if (!user) {
@@ -242,7 +271,8 @@ export class AuthService {
           antiVpnFlag,
           referralCode: this.generateReferralCode(profile.displayName),
           referredById: null,
-          lastLoginAt: new Date(),
+          lastLoginAt: null,
+          lastDailyBonusClaimAt: null,
         }));
       await this.walletService.ensureWallet(user.id);
     }
@@ -358,6 +388,12 @@ export class AuthService {
   private lookupCountry(ipAddress: string): string | null {
     const result = geoip.lookup(ipAddress);
     return result?.country ?? null;
+  }
+
+  private assertVpnAllowed(antiVpnFlag: boolean) {
+    if (antiVpnFlag) {
+      throw new ForbiddenException('VPN or proxy connections are not allowed on EarnDash.');
+    }
   }
 
   private generateReferralCode(displayName: string): string {

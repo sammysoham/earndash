@@ -3,12 +3,18 @@ class GamificationProfile {
     required this.level,
     required this.xp,
     required this.dailyStreak,
+    required this.streakMultiplier,
+    required this.streakFreezes,
+    required this.dailyLoginBonusCoins,
     required this.achievements,
   });
 
   final int level;
   final int xp;
   final int dailyStreak;
+  final double streakMultiplier;
+  final int streakFreezes;
+  final int dailyLoginBonusCoins;
   final List<AchievementModel> achievements;
 
   factory GamificationProfile.fromJson(Map<String, dynamic> json) {
@@ -16,6 +22,9 @@ class GamificationProfile {
       level: json['level'] as int? ?? 1,
       xp: json['xp'] as int? ?? 0,
       dailyStreak: json['dailyStreak'] as int? ?? 0,
+      streakMultiplier: (json['streakMultiplier'] as num? ?? 1).toDouble(),
+      streakFreezes: json['streakFreezes'] as int? ?? 0,
+      dailyLoginBonusCoins: json['dailyLoginBonusCoins'] as int? ?? 100,
       achievements: (json['achievements'] as List<dynamic>? ?? <dynamic>[])
           .map((item) => AchievementModel.fromJson(item as Map<String, dynamic>))
           .toList(),

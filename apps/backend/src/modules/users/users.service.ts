@@ -62,7 +62,6 @@ export class UsersService {
     user.lastKnownIp = signals.ipAddress;
     user.countryCode = signals.countryCode ?? user.countryCode;
     user.antiVpnFlag = signals.antiVpnFlag ?? user.antiVpnFlag;
-    user.lastLoginAt = new Date();
 
     const saved = await this.usersRepository.save(user);
 

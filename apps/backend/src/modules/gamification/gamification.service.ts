@@ -8,6 +8,9 @@ import { UsersService } from '../users/users.service';
 
 @Injectable()
 export class GamificationService {
+  private static readonly DAILY_LOGIN_BONUS_COINS = 100;
+  private static readonly MAX_STREAK_FREEZES = 3;
+
   constructor(
     private readonly usersService: UsersService,
     private readonly walletService: WalletService,
@@ -19,9 +22,12 @@ export class GamificationService {
     const user = await this.usersService.getByIdOrFail(userId);
     const today = new Date();
     const lastLogin = user.lastLoginAt;
+    let bonusEligible = false;
+    let freezeUsed = false;
 
     if (!lastLogin) {
       user.dailyStreak = 1;
+      bonusEligible = true;
     } else {
       const diffInDays = Math.floor(
         (Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()) -
@@ -29,15 +35,49 @@ export class GamificationService {
           (1000 * 60 * 60 * 24),
       );
 
+      if (diffInDays <= 0) {
+        return;
+      }
+
+      bonusEligible = true;
       if (diffInDays === 1) {
         user.dailyStreak += 1;
-      } else if (diffInDays > 1) {
+      } else if (diffInDays === 2 && user.streakFreezes > 0) {
+        user.streakFreezes -= 1;
+        user.dailyStreak += 1;
+        freezeUsed = true;
+      } else {
         user.dailyStreak = 1;
       }
     }
 
     user.xp += 25;
     user.level = this.levelForXp(user.xp);
+    user.lastLoginAt = today;
+    if (bonusEligible) {
+      const bonusCoins = Math.round(
+        GamificationService.DAILY_LOGIN_BONUS_COINS * this.streakMultiplier(user.dailyStreak),
+      );
+      user.lastDailyBonusClaimAt = today;
+      await this.walletService.addPendingCoins(
+        userId,
+        bonusCoins,
+        'DAILY_LOGIN_BONUS',
+        `${userId}:${today.toISOString().slice(0, 10)}`,
+        {
+          streak: user.dailyStreak,
+          multiplier: this.streakMultiplier(user.dailyStreak),
+          freezeUsed,
+        },
+      );
+      if (
+        user.dailyStreak > 0 &&
+        user.dailyStreak % 7 === 0 &&
+        user.streakFreezes < GamificationService.MAX_STREAK_FREEZES
+      ) {
+        user.streakFreezes += 1;
+      }
+    }
     await this.usersService.save(user);
 
     if (user.dailyStreak >= 7) {
@@ -127,6 +167,11 @@ export class GamificationService {
       level: user.level,
       xp: user.xp,
       dailyStreak: user.dailyStreak,
+      streakMultiplier: this.streakMultiplier(user.dailyStreak),
+      streakFreezes: user.streakFreezes,
+      dailyLoginBonusCoins: Math.round(
+        GamificationService.DAILY_LOGIN_BONUS_COINS * this.streakMultiplier(user.dailyStreak),
+      ),
       achievements,
     };
   }
@@ -147,5 +192,21 @@ export class GamificationService {
 
   private levelForXp(xp: number): number {
     return Math.floor(xp / 500) + 1;
+  }
+
+  private streakMultiplier(streak: number): number {
+    if (streak >= 30) {
+      return 3;
+    }
+    if (streak >= 14) {
+      return 2;
+    }
+    if (streak >= 7) {
+      return 1.5;
+    }
+    if (streak >= 3) {
+      return 1.2;
+    }
+    return 1;
   }
 }

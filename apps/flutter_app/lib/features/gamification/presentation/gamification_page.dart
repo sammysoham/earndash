@@ -45,7 +45,7 @@ class GamificationPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '${gamification.xp} XP • ${gamification.dailyStreak} day streak',
+                    '${gamification.xp} XP • ${gamification.dailyStreak} day streak • ${gamification.streakMultiplier.toStringAsFixed(gamification.streakMultiplier.truncateToDouble() == gamification.streakMultiplier ? 0 : 1)}x login bonus',
                     style: const TextStyle(color: Color(0xFF9FD5AF)),
                   ),
                   const SizedBox(height: 18),
@@ -62,6 +62,29 @@ class GamificationPage extends ConsumerWidget {
                   ),
                 ],
               ),
+            ),
+            const SizedBox(height: 24),
+            Wrap(
+              spacing: 12,
+              runSpacing: 12,
+              children: [
+                _InfoCard(
+                  title: 'Daily login bonus',
+                  value: '${gamification.dailyLoginBonusCoins} coins',
+                  subtitle: 'Your next verified login reward at the current streak.',
+                ),
+                _InfoCard(
+                  title: 'Streak multiplier',
+                  value:
+                      '${gamification.streakMultiplier.toStringAsFixed(gamification.streakMultiplier.truncateToDouble() == gamification.streakMultiplier ? 0 : 1)}x',
+                  subtitle: 'Applied to your daily login bonus.',
+                ),
+                _InfoCard(
+                  title: 'Streak freezes',
+                  value: '${gamification.streakFreezes}',
+                  subtitle: 'Automatically saves one missed day when available.',
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             const Text(
@@ -124,6 +147,47 @@ class GamificationPage extends ConsumerWidget {
         ),
         error: (error, _) => Center(child: Text('$error')),
         loading: () => const Center(child: CircularProgressIndicator()),
+      ),
+    );
+  }
+}
+
+class _InfoCard extends StatelessWidget {
+  const _InfoCard({
+    required this.title,
+    required this.value,
+    required this.subtitle,
+  });
+
+  final String title;
+  final String value;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 220,
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFF101A1D),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0x221FF5C6)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title, style: const TextStyle(color: Color(0xFF9CB1AA))),
+          const SizedBox(height: 10),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: const TextStyle(color: Color(0xFF9CB1AA), height: 1.4),
+          ),
+        ],
       ),
     );
   }

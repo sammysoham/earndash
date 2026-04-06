@@ -62,60 +62,53 @@ class ActivityTrackingService {
 
     _permissionGranted = await _ensurePermission();
 
-    if (Platform.isAndroid) {
-      await _startAndroidForegroundTracking();
-      if (_permissionGranted) {
-        _activitySubscription =
-            FlutterActivityRecognition.instance.activityStream.listen(
-          _onActivity,
-          onError: (Object error, StackTrace stackTrace) {
-            unawaited(
-              _writeMessage(
-                'Live activity classification is unavailable right now.',
-              ),
-            );
-            unawaited(_emitSnapshot());
-          },
-        );
-      }
-    } else {
-      if (!_permissionGranted) {
+    if (!_permissionGranted) {
+      if (Platform.isAndroid) {
         _initialized = true;
+        await _emitSnapshot();
         return getSnapshot();
       }
-
-      _stepSubscription = Pedometer.stepCountStream.listen(
-        _onStepCount,
-        onError: (Object error, StackTrace stackTrace) {
-          _supported = false;
-          unawaited(_writeMessage('Step sensor unavailable on this device.'));
-          unawaited(_emitSnapshot());
-        },
-      );
-
-      _statusSubscription = Pedometer.pedestrianStatusStream.listen(
-        _onPedestrianStatus,
-        onError: (Object error, StackTrace stackTrace) {
-          unawaited(
-            _writeMessage('Pedestrian status is not available on this device.'),
-          );
-          unawaited(_emitSnapshot());
-        },
-      );
-
-      _activitySubscription =
-          FlutterActivityRecognition.instance.activityStream.listen(
-        _onActivity,
-        onError: (Object error, StackTrace stackTrace) {
-          unawaited(
-            _writeMessage(
-              'Live activity classification is unavailable right now.',
-            ),
-          );
-          unawaited(_emitSnapshot());
-        },
-      );
+      _initialized = true;
+      return getSnapshot();
     }
+
+    if (Platform.isAndroid) {
+      await _startAndroidForegroundTracking();
+    }
+
+    _stepSubscription = Pedometer.stepCountStream.listen(
+      _onStepCount,
+      onError: (Object error, StackTrace stackTrace) {
+        if (!Platform.isAndroid) {
+          _supported = false;
+        }
+        unawaited(_writeMessage('Step sensor unavailable on this device.'));
+        unawaited(_emitSnapshot());
+      },
+    );
+
+    _statusSubscription = Pedometer.pedestrianStatusStream.listen(
+      _onPedestrianStatus,
+      onError: (Object error, StackTrace stackTrace) {
+        unawaited(
+          _writeMessage('Pedestrian status is not available on this device.'),
+        );
+        unawaited(_emitSnapshot());
+      },
+    );
+
+    _activitySubscription =
+        FlutterActivityRecognition.instance.activityStream.listen(
+      _onActivity,
+      onError: (Object error, StackTrace stackTrace) {
+        unawaited(
+          _writeMessage(
+            'Live activity classification is unavailable right now.',
+          ),
+        );
+        unawaited(_emitSnapshot());
+      },
+    );
 
     _initialized = true;
     await _emitSnapshot();

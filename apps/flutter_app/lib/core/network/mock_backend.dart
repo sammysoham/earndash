@@ -1532,6 +1532,7 @@ class _MockUser {
   int xp;
   int level;
   int dailyStreak;
+  int streakFreezes = 1;
   int referredEarners;
   int commissionEarnedCoins;
   int abuseFlags;
@@ -1572,6 +1573,9 @@ class _MockUser {
         level: level,
         xp: xp,
         dailyStreak: dailyStreak,
+        streakMultiplier: _mockStreakMultiplierForDays(dailyStreak),
+        streakFreezes: streakFreezes,
+        dailyLoginBonusCoins: (100 * _mockStreakMultiplierForDays(dailyStreak)).round(),
         achievements: List<AchievementModel>.from(achievements),
       );
 }
@@ -1639,4 +1643,20 @@ class _MockWithdrawal {
   String status;
   String? note;
   bool refunded = false;
+}
+
+double _mockStreakMultiplierForDays(int streak) {
+  if (streak >= 30) {
+    return 3;
+  }
+  if (streak >= 14) {
+    return 2;
+  }
+  if (streak >= 7) {
+    return 1.5;
+  }
+  if (streak >= 3) {
+    return 1.2;
+  }
+  return 1;
 }
