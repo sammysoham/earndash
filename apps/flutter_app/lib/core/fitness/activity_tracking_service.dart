@@ -61,43 +61,60 @@ class ActivityTrackingService {
     }
 
     _permissionGranted = await _ensurePermission();
-    if (!_permissionGranted) {
-      _initialized = true;
-      return getSnapshot();
-    }
-
-    _stepSubscription = Pedometer.stepCountStream.listen(
-      _onStepCount,
-      onError: (Object error, StackTrace stackTrace) {
-        _supported = false;
-        unawaited(_writeMessage('Step sensor unavailable on this device.'));
-        unawaited(_emitSnapshot());
-      },
-    );
-
-    _statusSubscription = Pedometer.pedestrianStatusStream.listen(
-      _onPedestrianStatus,
-      onError: (Object error, StackTrace stackTrace) {
-        unawaited(
-          _writeMessage('Pedestrian status is not available on this device.'),
-        );
-        unawaited(_emitSnapshot());
-      },
-    );
-
-    _activitySubscription =
-        FlutterActivityRecognition.instance.activityStream.listen(
-      _onActivity,
-      onError: (Object error, StackTrace stackTrace) {
-        unawaited(
-          _writeMessage('Live activity classification is unavailable right now.'),
-        );
-        unawaited(_emitSnapshot());
-      },
-    );
 
     if (Platform.isAndroid) {
       await _startAndroidForegroundTracking();
+      if (_permissionGranted) {
+        _activitySubscription =
+            FlutterActivityRecognition.instance.activityStream.listen(
+          _onActivity,
+          onError: (Object error, StackTrace stackTrace) {
+            unawaited(
+              _writeMessage(
+                'Live activity classification is unavailable right now.',
+              ),
+            );
+            unawaited(_emitSnapshot());
+          },
+        );
+      }
+    } else {
+      if (!_permissionGranted) {
+        _initialized = true;
+        return getSnapshot();
+      }
+
+      _stepSubscription = Pedometer.stepCountStream.listen(
+        _onStepCount,
+        onError: (Object error, StackTrace stackTrace) {
+          _supported = false;
+          unawaited(_writeMessage('Step sensor unavailable on this device.'));
+          unawaited(_emitSnapshot());
+        },
+      );
+
+      _statusSubscription = Pedometer.pedestrianStatusStream.listen(
+        _onPedestrianStatus,
+        onError: (Object error, StackTrace stackTrace) {
+          unawaited(
+            _writeMessage('Pedestrian status is not available on this device.'),
+          );
+          unawaited(_emitSnapshot());
+        },
+      );
+
+      _activitySubscription =
+          FlutterActivityRecognition.instance.activityStream.listen(
+        _onActivity,
+        onError: (Object error, StackTrace stackTrace) {
+          unawaited(
+            _writeMessage(
+              'Live activity classification is unavailable right now.',
+            ),
+          );
+          unawaited(_emitSnapshot());
+        },
+      );
     }
 
     _initialized = true;
@@ -146,7 +163,7 @@ class ActivityTrackingService {
     var message = prefs.getString(_messageKey);
     var supported = _supported;
     var permissionGranted = _permissionGranted;
-    var source = 'step_counter';
+    var source = Platform.isAndroid ? 'android_foreground_service' : 'step_counter';
 
     var weeklyHistory = _buildWeeklyHistory(
       todayDateKey: todayDateKey,
@@ -165,10 +182,17 @@ class ActivityTrackingService {
         mergedTodaySteps = max(mergedTodaySteps, foregroundSnapshot.todaySteps);
         mergedDistanceKm = max(mergedDistanceKm, mergedTodaySteps * 0.00078);
         mergedCalories = max(mergedCalories, (mergedTodaySteps * 0.04).round());
+        permissionGranted = permissionGranted || foregroundSnapshot.lastSensorAt > 0;
         if (foregroundSnapshot.running && status == 'unknown') {
           status = 'tracking';
         }
-        source = '$source + ${foregroundSnapshot.source}';
+        source = foregroundSnapshot.source;
+        if (foregroundSnapshot.supported &&
+            foregroundSnapshot.lastSensorAt == 0 &&
+            message == null) {
+          message =
+              'Step tracking is ready. Walk a few steps with the phone on you to start syncing.';
+        }
       }
 
       final healthSnapshot = await _healthConnectService.syncWeeklyHistory();
@@ -186,6 +210,7 @@ class ActivityTrackingService {
           mergedWalkMinutes = max(mergedWalkMinutes, mergedActiveMinutes);
           mergedCalories = max(mergedCalories, healthSnapshot.todayCalories);
           permissionGranted = true;
+          supported = true;
         } else if (healthSnapshot.message != null && message == null) {
           message = healthSnapshot.message;
         }
@@ -532,12 +557,14 @@ class _AndroidMotionSnapshot {
     required this.supported,
     required this.running,
     required this.todaySteps,
+    required this.lastSensorAt,
     required this.source,
   });
 
   final bool supported;
   final bool running;
   final int todaySteps;
+  final int lastSensorAt;
   final String source;
 
   factory _AndroidMotionSnapshot.fromJson(Map<String, dynamic> json) {
@@ -545,6 +572,7 @@ class _AndroidMotionSnapshot {
       supported: json['supported'] as bool? ?? true,
       running: json['running'] as bool? ?? false,
       todaySteps: json['todaySteps'] as int? ?? 0,
+      lastSensorAt: json['lastSensorAt'] as int? ?? 0,
       source: json['source'] as String? ?? 'android_foreground_service',
     );
   }

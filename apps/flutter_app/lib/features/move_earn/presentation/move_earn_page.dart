@@ -75,7 +75,7 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
                       : () => _activateBoost(),
                   adCooldownText: adCooldownSeconds > 0
                       ? 'Next rewarded boost video unlocks in ${adCooldownSeconds}s.'
-                      : '1,000 steps = 10 coins, and one rewarded video can activate a 2x multiplier for 30 seconds.',
+                      : '1,000 steps = 10 coins, and one rewarded video can activate a 2x multiplier for 5 minutes.',
                 ),
                 const SizedBox(height: 24),
                 Wrap(
@@ -293,14 +293,14 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
         await LocalNotificationsService.instance.showRewardEarned(
           coins: adReward,
           title: 'Step boost activated',
-          body: '2x multiplier is live for 30 seconds.',
+          body: '2x multiplier is live for 5 minutes.',
         );
       }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                '2x step boost is live for 30 seconds. Video reward: +$adReward pending coins'),
+                '2x step boost is live for 5 minutes. Video reward: +$adReward pending coins'),
           ),
         );
       }
@@ -328,8 +328,10 @@ class _MoveEarnPageState extends ConsumerState<MoveEarnPage> {
       return 'Boost ready';
     }
 
-    final seconds = remaining.inSeconds.toString().padLeft(2, '0');
-    return '2x boost active • $seconds s left';
+    final totalSeconds = remaining.inSeconds;
+    final minutes = (totalSeconds ~/ 60).toString().padLeft(2, '0');
+    final seconds = (totalSeconds % 60).toString().padLeft(2, '0');
+    return '2x boost active • $minutes:$seconds left';
   }
 
   int _secondsUntilNextRewardedAd(DateTime? cooldownEndsAt) {
@@ -416,7 +418,7 @@ class _MoveHero extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           const Text(
-            'Walking, running, verified step tracking, short boost windows, streaks, and anti-cheat controls now work together in one fitness workspace.',
+            'Walking, running, verified step tracking, five-minute boost windows, streaks, and anti-cheat controls now work together in one fitness workspace.',
             style: TextStyle(color: Color(0xFF9FD5AF), height: 1.6),
           ),
           const SizedBox(height: 22),
@@ -988,7 +990,7 @@ class _RankCard extends StatelessWidget {
                   value: '${data.rankMultiplier.toStringAsFixed(1)}x'),
               _RankMeta(
                   label: 'Boost',
-                  value: data.stepBoostActive ? '30s live' : 'Ready'),
+                  value: data.stepBoostActive ? '5m live' : 'Ready'),
               _RankMeta(
                   label: 'Goal streak', value: '${data.goalStreakDays} days'),
             ],

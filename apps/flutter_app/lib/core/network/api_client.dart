@@ -234,19 +234,22 @@ class ApiClient {
   }
 
   Future<SessionUser> updatePreferences({
-    required bool showInLeaderboard,
+    bool? showInLeaderboard,
+    String? displayName,
   }) async {
     if (AppConstants.useMockApi) {
       return _mockBackend.updatePreferences(
         userId: _requireUserId(),
         showInLeaderboard: showInLeaderboard,
+        displayName: displayName,
       );
     }
 
     final response = await _dio.post<Map<String, dynamic>>(
       '/auth/preferences',
       data: {
-        'showInLeaderboard': showInLeaderboard,
+        if (showInLeaderboard != null) 'showInLeaderboard': showInLeaderboard,
+        if (displayName != null) 'displayName': displayName,
       },
     );
     return SessionUser.fromJson(response.data!['user'] as Map<String, dynamic>);

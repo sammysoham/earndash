@@ -106,7 +106,7 @@ export class FitnessService {
       this.usersService.getByIdOrFail(userId),
       this.ensureStats(userId),
     ]);
-    stats.stepBoostEndsAt = new Date(Date.now() + 30 * 1000);
+    stats.stepBoostEndsAt = new Date(Date.now() + 5 * 60 * 1000);
     await this.activityRepository.save(stats);
     await this.auditService.log(userId, 'MOVE_EARN_BOOST_ACTIVATED', 'USER', userId, {});
     return this.buildOverview(user.level, stats);
@@ -281,6 +281,8 @@ export class FitnessService {
     return (
       normalized.includes('health_connect') ||
       normalized.includes('android_foreground_service') ||
+      normalized.includes('android_step_detector') ||
+      normalized.includes('android_step_counter') ||
       normalized.includes('step_counter')
     );
   }

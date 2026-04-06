@@ -23,13 +23,15 @@ class StepForegroundService : Service(), SensorEventListener {
 
     private var sensorManager: SensorManager? = null
     private var stepCounter: Sensor? = null
+    private var stepDetector: Sensor? = null
 
     override fun onCreate() {
         super.onCreate()
         createNotificationChannel()
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         stepCounter = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        MotionTrackingStore.setSupported(this, stepCounter != null)
+        stepDetector = sensorManager?.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+        MotionTrackingStore.setSupported(this, stepCounter != null || stepDetector != null)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -58,15 +60,24 @@ class StepForegroundService : Service(), SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent?) {
         val sensorEvent = event ?: return
-        if (sensorEvent.sensor.type == Sensor.TYPE_STEP_COUNTER) {
-            MotionTrackingStore.updateStepCounter(this, sensorEvent.values.first().toInt())
+        when (sensorEvent.sensor.type) {
+            Sensor.TYPE_STEP_COUNTER -> {
+                MotionTrackingStore.updateStepCounter(this, sensorEvent.values.first().toInt())
+            }
+
+            Sensor.TYPE_STEP_DETECTOR -> {
+                MotionTrackingStore.incrementStepDetector(
+                    this,
+                    sensorEvent.values.firstOrNull()?.toInt() ?: 1,
+                )
+            }
         }
     }
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) = Unit
 
     private fun startTracking() {
-        val sensor = stepCounter
+        val sensor = stepCounter ?: stepDetector
         if (sensor == null) {
             MotionTrackingStore.setSupported(this, false)
             return

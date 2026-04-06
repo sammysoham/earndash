@@ -16,6 +16,7 @@ object MotionTrackingStore {
     private const val KEY_SUPPORTED = "supported"
     private const val KEY_LAST_SENSOR_AT = "last_sensor_at"
     private const val KEY_AUTO_START = "auto_start"
+    private const val KEY_SOURCE = "source"
 
     private val formatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE
 
@@ -31,6 +32,7 @@ object MotionTrackingStore {
                 .putInt(KEY_TODAY_STEPS, 0)
                 .putInt(KEY_LAST_RAW_STEPS, rawSteps)
                 .putLong(KEY_LAST_SENSOR_AT, System.currentTimeMillis())
+                .putString(KEY_SOURCE, "android_step_counter")
                 .apply()
             return
         }
@@ -41,6 +43,34 @@ object MotionTrackingStore {
             .putInt(KEY_LAST_RAW_STEPS, rawSteps)
             .putInt(KEY_TODAY_STEPS, steps)
             .putLong(KEY_LAST_SENSOR_AT, System.currentTimeMillis())
+            .putString(KEY_SOURCE, "android_step_counter")
+            .apply()
+    }
+
+    fun incrementStepDetector(context: Context, delta: Int = 1) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val today = currentDay()
+        val storedDay = prefs.getString(KEY_CURRENT_DAY, null)
+        val normalizedDelta = delta.coerceAtLeast(1)
+
+        if (storedDay == null || storedDay != today) {
+            prefs.edit()
+                .putString(KEY_CURRENT_DAY, today)
+                .putInt(KEY_BASELINE_STEPS, 0)
+                .putInt(KEY_TODAY_STEPS, normalizedDelta)
+                .putInt(KEY_LAST_RAW_STEPS, normalizedDelta)
+                .putLong(KEY_LAST_SENSOR_AT, System.currentTimeMillis())
+                .putString(KEY_SOURCE, "android_step_detector")
+                .apply()
+            return
+        }
+
+        val nextSteps = prefs.getInt(KEY_TODAY_STEPS, 0) + normalizedDelta
+        prefs.edit()
+            .putInt(KEY_TODAY_STEPS, nextSteps)
+            .putInt(KEY_LAST_RAW_STEPS, nextSteps)
+            .putLong(KEY_LAST_SENSOR_AT, System.currentTimeMillis())
+            .putString(KEY_SOURCE, "android_step_detector")
             .apply()
     }
 
@@ -82,7 +112,8 @@ object MotionTrackingStore {
             "todayDateKey" to today,
             "todaySteps" to todaySteps,
             "lastSensorAt" to prefs.getLong(KEY_LAST_SENSOR_AT, 0L),
-            "source" to "android_foreground_service",
+            "source" to (prefs.getString(KEY_SOURCE, "android_foreground_service")
+                ?: "android_foreground_service"),
         )
     }
 

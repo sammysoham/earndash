@@ -369,7 +369,7 @@ class MockBackend {
   Future<MoveEarnOverview> activateStepBoost(String userId) {
     return _withLatency(() {
       final user = _usersById[userId]!;
-      user.stepBoostEndsAt = DateTime.now().add(const Duration(minutes: 30));
+      user.stepBoostEndsAt = DateTime.now().add(const Duration(minutes: 5));
       user.transactions.insert(
         0,
         _transaction(
@@ -777,11 +777,17 @@ class MockBackend {
 
   Future<SessionUser> updatePreferences({
     required String userId,
-    required bool showInLeaderboard,
+    bool? showInLeaderboard,
+    String? displayName,
   }) {
     return _withLatency(() {
       final user = _usersById[userId]!;
-      user.showInLeaderboard = showInLeaderboard;
+      if (showInLeaderboard != null) {
+        user.showInLeaderboard = showInLeaderboard;
+      }
+      if (displayName != null && displayName.trim().isNotEmpty) {
+        user.displayName = displayName.trim();
+      }
       return _toSession(user, 'mock-token-${user.id}').user;
     });
   }
@@ -1514,7 +1520,7 @@ class _MockUser {
 
   final String id;
   final String email;
-  final String displayName;
+  String displayName;
   final String role;
   final String referralCode;
   final String countryCode;

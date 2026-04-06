@@ -127,7 +127,8 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
   }
 
   Future<void> updatePreferences({
-    required bool showInLeaderboard,
+    bool? showInLeaderboard,
+    String? displayName,
   }) async {
     final currentSession = state.value;
     if (currentSession == null) {
@@ -137,6 +138,7 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
     try {
       final updatedUser = await _ref.read(apiClientProvider).updatePreferences(
             showInLeaderboard: showInLeaderboard,
+            displayName: displayName,
           );
       state = AsyncData(
         UserSession(

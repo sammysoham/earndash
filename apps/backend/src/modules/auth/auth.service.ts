@@ -332,9 +332,13 @@ export class AuthService {
     if (typeof dto.showInLeaderboard === 'boolean') {
       user.showInLeaderboard = dto.showInLeaderboard;
     }
+    if (typeof dto.displayName === 'string' && dto.displayName.trim().length > 0) {
+      user.displayName = dto.displayName.trim();
+    }
     const savedUser = await this.usersService.save(user);
     await this.auditService.log(userId, 'USER_PREFERENCES_UPDATED', 'USER', userId, {
       showInLeaderboard: savedUser.showInLeaderboard,
+      displayName: savedUser.displayName,
     });
 
     return {

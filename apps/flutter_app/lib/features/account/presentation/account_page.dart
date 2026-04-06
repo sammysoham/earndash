@@ -13,11 +13,24 @@ class AccountPage extends ConsumerStatefulWidget {
 
 class _AccountPageState extends ConsumerState<AccountPage> {
   bool _savingPrivacy = false;
+  bool _savingProfile = false;
+  final TextEditingController _displayNameController = TextEditingController();
+  String? _loadedDisplayName;
+
+  @override
+  void dispose() {
+    _displayNameController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(authControllerProvider).value;
     final user = session?.user;
+    if (user != null && _loadedDisplayName != user.displayName) {
+      _loadedDisplayName = user.displayName;
+      _displayNameController.text = user.displayName;
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Account & Privacy')),
@@ -67,6 +80,51 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                                 : 'Anonymous leaderboard',
                           ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF101A1D),
+                    borderRadius: BorderRadius.circular(24),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Profile name',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Pick the name you want to use around the app. This is also the name shown on leaderboards when public visibility is enabled.',
+                        style: TextStyle(
+                          color: Color(0xFF9CB1AA),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: _displayNameController,
+                        maxLength: 24,
+                        decoration: const InputDecoration(
+                          labelText: 'Display name',
+                          hintText: 'Enter a custom profile name',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      FilledButton.icon(
+                        onPressed: _savingProfile ? null : _saveDisplayName,
+                        icon: const Icon(Icons.save_rounded),
+                        label: Text(
+                          _savingProfile ? 'Saving...' : 'Save profile name',
+                        ),
                       ),
                     ],
                   ),
@@ -201,6 +259,45 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     } finally {
       if (mounted) {
         setState(() => _savingPrivacy = false);
+      }
+    }
+  }
+
+  Future<void> _saveDisplayName() async {
+    final nextName = _displayNameController.text.trim();
+    if (nextName.length < 3) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Display name must be at least 3 characters long.'),
+        ),
+      );
+      return;
+    }
+
+    setState(() => _savingProfile = true);
+    try {
+      await ref.read(authControllerProvider.notifier).updatePreferences(
+            displayName: nextName,
+          );
+      ref.invalidate(leaderboardProvider);
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile name updated.')),
+      );
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _savingProfile = false);
       }
     }
   }
