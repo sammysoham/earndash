@@ -14,6 +14,7 @@ class AccountPage extends ConsumerStatefulWidget {
 class _AccountPageState extends ConsumerState<AccountPage> {
   bool _savingPrivacy = false;
   bool _savingProfile = false;
+  bool _requestingDeletion = false;
   final TextEditingController _displayNameController = TextEditingController();
   String? _loadedDisplayName;
 
@@ -228,6 +229,49 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF201012),
+                    borderRadius: BorderRadius.circular(24),
+                    border: Border.all(color: const Color(0x33FF6B6B)),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Danger zone',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Request account deletion from inside the app. This will immediately restrict access while the request is reviewed and processed.',
+                        style: TextStyle(
+                          color: Color(0xFFCCB5B7),
+                          height: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      OutlinedButton.icon(
+                        onPressed: _requestingDeletion ? null : _requestDeletion,
+                        icon: const Icon(Icons.delete_outline_rounded),
+                        label: Text(
+                          _requestingDeletion
+                              ? 'Submitting request...'
+                              : 'Request account deletion',
+                        ),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFFF9E9E),
+                          side: const BorderSide(color: Color(0x66FF6B6B)),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
     );
@@ -303,6 +347,79 @@ class _AccountPageState extends ConsumerState<AccountPage> {
     } finally {
       if (mounted) {
         setState(() => _savingProfile = false);
+      }
+    }
+  }
+
+  Future<void> _requestDeletion() async {
+    final reasonController = TextEditingController();
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete account?'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'This sends an account deletion request and immediately restricts your access while the request is reviewed.',
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: reasonController,
+              minLines: 3,
+              maxLines: 5,
+              decoration: const InputDecoration(
+                labelText: 'Reason (optional)',
+                hintText: 'Tell us why you want to delete the account',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Submit request'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      reasonController.dispose();
+      return;
+    }
+
+    setState(() => _requestingDeletion = true);
+    try {
+      await ref.read(authControllerProvider.notifier).requestAccountDeletion(
+            reason: reasonController.text.trim(),
+          );
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Account deletion request submitted.'),
+        ),
+      );
+      context.go('/login');
+    } catch (error) {
+      if (!mounted) {
+        return;
+      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+        ),
+      );
+    } finally {
+      reasonController.dispose();
+      if (mounted) {
+        setState(() => _requestingDeletion = false);
       }
     }
   }

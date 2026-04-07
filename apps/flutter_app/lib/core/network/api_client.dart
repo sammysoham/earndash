@@ -255,6 +255,22 @@ class ApiClient {
     return SessionUser.fromJson(response.data!['user'] as Map<String, dynamic>);
   }
 
+  Future<void> requestAccountDeletion({String? reason}) async {
+    if (AppConstants.useMockApi) {
+      return _mockBackend.requestAccountDeletion(
+        userId: _requireUserId(),
+        reason: reason,
+      );
+    }
+
+    await _dio.post<void>(
+      '/auth/delete-account',
+      data: {
+        if (reason != null && reason.trim().isNotEmpty) 'reason': reason.trim(),
+      },
+    );
+  }
+
   Future<GamificationProfile> getGamificationProfile() async {
     if (AppConstants.useMockApi) {
       return _mockBackend.getGamificationProfile(_requireUserId());

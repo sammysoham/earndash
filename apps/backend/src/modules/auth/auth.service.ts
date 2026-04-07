@@ -14,6 +14,8 @@ import { LoginDto } from './dto/login.dto';
 import { SignupDto } from './dto/signup.dto';
 import { GoogleMobileLoginDto } from './dto/google-mobile-login.dto';
 import { UpdatePreferencesDto } from './dto/update-preferences.dto';
+import { RequestAccountDeletionDto } from './dto/request-account-deletion.dto';
+import { PublicAccountDeletionRequestDto } from './dto/public-account-deletion-request.dto';
 import { FirebaseAdminService } from '../../common/firebase/firebase-admin.service';
 import { UsersService } from '../users/users.service';
 import { WalletService } from '../wallet/wallet.service';
@@ -385,6 +387,32 @@ export class AuthService {
     };
   }
 
+  async requestAuthenticatedAccountDeletion(
+    userId: string,
+    dto: RequestAccountDeletionDto,
+  ) {
+    const user = await this.usersService.getByIdOrFail(userId);
+    await this.markAccountDeletionRequested(user, 'IN_APP', dto.reason);
+    return {
+      success: true,
+      message:
+        'Your account deletion request has been recorded. Access may be restricted while we complete review.',
+      requestedAt: user.deletionRequestedAt,
+    };
+  }
+
+  async requestPublicAccountDeletion(dto: PublicAccountDeletionRequestDto) {
+    const user = await this.usersService.findByEmail(dto.email.trim().toLowerCase());
+    if (user) {
+      await this.markAccountDeletionRequested(user, 'WEB', dto.reason);
+    }
+    return {
+      success: true,
+      message:
+        'If an account exists for that email address, a deletion request has been recorded for review.',
+    };
+  }
+
   private lookupCountry(ipAddress: string): string | null {
     const result = geoip.lookup(ipAddress);
     return result?.country ?? null;
@@ -399,5 +427,26 @@ export class AuthService {
   private generateReferralCode(displayName: string): string {
     const safeName = displayName.replace(/[^a-zA-Z0-9]/g, '').slice(0, 6).toUpperCase();
     return `${safeName || 'USER'}${randomUUID().slice(0, 6).toUpperCase()}`;
+  }
+
+  private async markAccountDeletionRequested(
+    user: User,
+    source: 'IN_APP' | 'WEB',
+    reason?: string,
+  ) {
+    if (!user.deletionRequestedAt) {
+      user.deletionRequestedAt = new Date();
+    }
+    user.deletionRequestSource = source;
+    user.deletionRequestReason = reason?.trim() ? reason.trim() : null;
+    user.isBlocked = true;
+    user.withdrawalsDisabled = true;
+    user.showInLeaderboard = false;
+    await this.usersService.save(user);
+    await this.auditService.log(user.id, 'ACCOUNT_DELETION_REQUESTED', 'USER', user.id, {
+      source,
+      reason: user.deletionRequestReason,
+      requestedAt: user.deletionRequestedAt.toISOString(),
+    });
   }
 }

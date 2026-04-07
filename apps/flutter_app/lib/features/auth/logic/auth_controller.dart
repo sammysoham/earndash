@@ -152,6 +152,21 @@ class AuthController extends StateNotifier<AsyncValue<UserSession?>> {
     }
   }
 
+  Future<void> requestAccountDeletion({String? reason}) async {
+    final currentSession = state.value;
+    if (currentSession == null) {
+      return;
+    }
+
+    try {
+      await _ref.read(apiClientProvider).requestAccountDeletion(reason: reason);
+      await logout();
+    } catch (error) {
+      state = AsyncData(currentSession);
+      throw Exception(_readableAuthError(error));
+    }
+  }
+
   String _readableAuthError(Object error) {
     if (error is DioException) {
       final data = error.response?.data;

@@ -93,4 +93,13 @@ export class User extends AppBaseEntity {
 
   @Column({ name: 'last_daily_bonus_claim_at', type: 'timestamptz', nullable: true })
   lastDailyBonusClaimAt!: Date | null;
+
+  @Column({ name: 'deletion_requested_at', type: 'timestamptz', nullable: true })
+  deletionRequestedAt!: Date | null;
+
+  @Column({ name: 'deletion_request_reason', type: 'varchar', nullable: true })
+  deletionRequestReason!: string | null;
+
+  @Column({ name: 'deletion_request_source', type: 'varchar', nullable: true })
+  deletionRequestSource!: string | null;
 }

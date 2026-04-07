@@ -792,6 +792,27 @@ class MockBackend {
     });
   }
 
+  Future<void> requestAccountDeletion({
+    required String userId,
+    String? reason,
+  }) {
+    return _withLatency(() {
+      final user = _usersById[userId]!;
+      user.isBlocked = true;
+      user.showInLeaderboard = false;
+      user.transactions.insert(
+        0,
+        _transaction(
+          type: 'ACCOUNT_DELETION_REQUESTED',
+          status: 'PENDING',
+          coins: 0,
+          referenceType:
+              reason != null && reason.trim().isNotEmpty ? reason.trim() : 'USER_REQUEST',
+        ),
+      );
+    });
+  }
+
   _MockUser _createUser({
     required String email,
     required String displayName,
