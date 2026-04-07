@@ -213,6 +213,11 @@ class _AccountPageState extends ConsumerState<AccountPage> {
                             icon: const Icon(Icons.gavel_rounded),
                             label: const Text('View terms'),
                           ),
+                          FilledButton.tonalIcon(
+                            onPressed: () => context.push('/privacy'),
+                            icon: const Icon(Icons.privacy_tip_outlined),
+                            label: const Text('Privacy policy'),
+                          ),
                           OutlinedButton.icon(
                             onPressed: () => context.go('/leaderboard'),
                             icon: const Icon(Icons.leaderboard_outlined),
